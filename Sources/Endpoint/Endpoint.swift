@@ -101,22 +101,94 @@ class Endpoint<Payload> {
     func parse(data: Data, page: Int = 0) -> Payload? {
         return nil
     }
-}
+    
+    private func addPath(toUrl baseUrl: URL) -> URL {
+        var url = baseUrl
+        if !pathPrefix.isEmpty {
+            url.appendPathComponent(pathPrefix)
+        }
+        
+        if let objId = objId {
+            url.appendPathComponent("\(objId)")
+        }
+        if let pathSuffix = pathSuffix {
+            url.appendPathComponent(pathSuffix)
+        }
+        
+        return url
+    }
+    
+    func requestQueryParams(page: Int = 0) -> [String: String] {
+        var qParams = queryParams
+        if paging {
+            let pageParams = [
+                "page_size": "\(perPage)",
+                "page_number": "\(page)"
+            ]
+            qParams = pageParams.merging(qParams) { (_, new) in new }
+        }
+        return qParams
+    }
+    
+    func requestEncodedQueryParams(forQueryParams qParams: [String: String]) -> [URLQueryItem] {
+        let percentEncodedQueryItems: [URLQueryItem] = qParams.map { arg in
+            let (key, value) = arg
+            return URLQueryItem(name: key, value: "\(value)".percentEscaped)
+        }
 
-extension Endpoint: Equatable {
-    static func == (lhs: Endpoint, rhs: Endpoint) -> Bool {
-        return (lhs.pathPrefix == rhs.pathPrefix)
-            && (lhs.pathSuffix == rhs.pathSuffix)
-            && (lhs.objId == rhs.objId)
-            && (lhs.method == rhs.method)
-            && (lhs.queryParams == rhs.queryParams)
-            && (lhs.formParams == rhs.formParams)
-            && (lhs.jsonBody == rhs.jsonBody)
-            && (lhs.mimeTypes == rhs.mimeTypes)
-            && (lhs.statusCodes == rhs.statusCodes)
-            && (lhs.username == rhs.username)
-            && (lhs.password == rhs.password)
-            && (lhs.body == rhs.body)
-            && (lhs.dateFormatter == rhs.dateFormatter)
+        return percentEncodedQueryItems
+    }
+    
+    
+    func urlRequest(baseUrl: URL, page: Int = 0, extraHeaders: [String: String] = [:]) -> URLRequest? {
+        
+        let url = addPath(toUrl: baseUrl)
+        
+        guard var components = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
+            return nil
+        }
+        
+        var qParams = requestQueryParams(page: page)
+        components.percentEncodedQueryItems = requestEncodedQueryParams(forQueryParams: qParams)
+
+        FIXME -- continue to break this stuff out
+        
+        guard let cUrl = components.url else {
+            assertionFailure("Failed to get URL from components.")
+            return nil
+        }
+        
+        var headers = extraHeaders
+        headers ["Accept-Encoding"] = "gzip"
+        
+        if (method == .post || method == .patch) && contentType == nil {
+            headers["Content-Type"] = formBody != nil ? "application/x-www-form-urlencoded" : "application/json"
+        }
+        if let contentType = contentType {
+            headers["Content-Type"] = contentType
+        }
+        
+        // Basic auth
+        if let username = username,
+            let loginData = "\(username):\(password ?? "")".data(using: .utf8) {
+            let base64LoginData = loginData.base64EncodedString()
+            headers["Authorization"] = "Basic \(base64LoginData)"
+        }
+        
+        var req = URLRequest(url: cUrl)
+        req.httpMethod = method.rawValue
+        req.allHTTPHeaderFields = headers
+        
+        if let body = body {
+            req.httpBody = body
+        } else if let formBody = formBody {
+            req.httpBody = formBody
+        } else {
+            req.httpBody = jsonBody
+        }
+        
+        return req
     }
 }
+
+extension Endpoint: Equatable {}
