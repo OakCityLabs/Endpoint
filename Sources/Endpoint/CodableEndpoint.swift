@@ -17,7 +17,7 @@ class CodableEndpoint<Payload: Codable>: Endpoint<Payload> {
         do {
             return try decoder.decode(Payload.self, from: data)
         } catch {
-            globalDebug("Failed to decode server response with error: \(error)")
+            print("Failed to decode server response with error: \(error)")
             return nil
         }
     }
