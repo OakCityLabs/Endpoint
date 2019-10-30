@@ -1,2 +1,3 @@
 # Endpoint
-Swift Package for (REST) Endpoint objects
+
+A description of this package.
