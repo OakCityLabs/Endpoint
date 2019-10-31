@@ -9,7 +9,7 @@
 import Endpoint
 import XCTest
 
-final class DateFormatterTests: XCTestCase {
+class DateFormatterTests: XCTestCase {
     let formatter = DateFormatter.iso8601Full
     
     func testFormat() {

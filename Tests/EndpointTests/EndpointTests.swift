@@ -29,7 +29,7 @@ private struct OtherPagingPayload {
 private typealias OtherPagingEndpoint = Endpoint<OtherPagingPayload>
 extension OtherPagingPayload: EndpointPageable {
     static var perPage: Int {
-        return 5309
+        return 5_309
     }
     static var perPageLabel: String {
         return "how_many"
@@ -39,86 +39,7 @@ extension OtherPagingPayload: EndpointPageable {
     }
 }
 
-
-final class EndpointTests: XCTestCase {
-    func testEqualitySimple() {
-        
-        let urlA = URL(string: "http://oakcity.io/A/api")!
-        let urlB = URL(string: "http://oakcity.io/B/api")!
-        
-        let endpointA = DummyEndpoint(serverUrl: urlA, pathPrefix: "hello")
-        let endpointA2 = DummyEndpoint(serverUrl: urlA, pathPrefix: "hello")
-        let endpointB = DummyEndpoint(serverUrl: urlB, pathPrefix: "hello")
-
-        XCTAssertEqual(endpointA, endpointA2)
-        XCTAssertNotEqual(endpointA, endpointB)
-    }
-
-    func testEquality() {
-        
-        let urlA = URL(string: "http://oakcity.io/A")!
-        let prefix = "api/v1"
-        let objId = "837"
-        let suffix = "followers"
-        let qParams = ["level": "7", "rank": "full"]
-        let jsonParams: [String: Any] = ["bob": "bob", "larry": true, "daryl": 47]
-        let mimeTypes = ["text/text"]
-        let contentType = "json"
-        let statusCodes = Array(189...197)
-        let username = "spock"
-        let password = "hotgreenblooded"
-        let dateFormatter: DateFormatter = {
-            let dFormatter = DateFormatter()
-            dFormatter.timeStyle = .long
-            dFormatter.dateStyle = .none
-            return dFormatter
-        }()
-
-        let endpointA = DummyEndpoint(serverUrl: urlA,
-                                      pathPrefix: prefix,
-                                      method: .patch,
-                                      objId: objId,
-                                      pathSuffix: suffix,
-                                      queryParams: qParams,
-                                      jsonParams: jsonParams,
-                                      mimeTypes: mimeTypes,
-                                      contentType: contentType,
-                                      statusCodes: statusCodes,
-                                      username: username,
-                                      password: password,
-                                      dateFormatter: dateFormatter)
-        let endpointA2 = DummyEndpoint(serverUrl: urlA,
-                                       pathPrefix: prefix,
-                                       method: .patch,
-                                       objId: objId,
-                                       pathSuffix: suffix,
-                                       queryParams: qParams,
-                                       jsonParams: jsonParams,
-                                       mimeTypes: mimeTypes,
-                                       contentType: contentType,
-                                       statusCodes: statusCodes,
-                                       username: username,
-                                       password: password,
-                                       dateFormatter: dateFormatter)
-        
-        let otherSuffix = "favorites"
-        let endpointB = DummyEndpoint(serverUrl: urlA,
-                                      pathPrefix: prefix,
-                                      method: .patch,
-                                      objId: objId,
-                                      pathSuffix: otherSuffix,
-                                      queryParams: qParams,
-                                      jsonParams: jsonParams,
-                                      mimeTypes: mimeTypes,
-                                      contentType: contentType,
-                                      statusCodes: statusCodes,
-                                      username: username,
-                                      password: password,
-                                      dateFormatter: dateFormatter)
-        
-        XCTAssertEqual(endpointA, endpointA2)
-        XCTAssertNotEqual(endpointA, endpointB)
-    }
+class EndpointTests: XCTestCase {
     
     func testDefaults() {
         let endpoint = DummyEndpoint(serverUrl: URL(string: "http://oakcity.io")!, pathPrefix: "")
@@ -160,7 +81,7 @@ final class EndpointTests: XCTestCase {
         ]
         
         do {
-            let endpoint = DummyEndpoint(serverUrl: URL(string:"http://oakcity.io")!,
+            let endpoint = DummyEndpoint(serverUrl: URL(string: "http://oakcity.io")!,
                                          pathPrefix: "",
                                          queryParams: qParams)
 
@@ -173,7 +94,7 @@ final class EndpointTests: XCTestCase {
         }
         
         do {
-            let endpoint = DummyPagingEndpoint(serverUrl: URL(string:"http://oakcity.io")!,
+            let endpoint = DummyPagingEndpoint(serverUrl: URL(string: "http://oakcity.io")!,
                                                pathPrefix: "",
                                                queryParams: qParams)
 
@@ -188,7 +109,7 @@ final class EndpointTests: XCTestCase {
         }
         
         do {
-            let endpoint = OtherPagingEndpoint(serverUrl: URL(string:"http://oakcity.io")!,
+            let endpoint = OtherPagingEndpoint(serverUrl: URL(string: "http://oakcity.io")!,
                                                pathPrefix: "",
                                                queryParams: qParams)
 
@@ -205,7 +126,7 @@ final class EndpointTests: XCTestCase {
     }
     
     func testMethod() {
-        let endpoint = DummyEndpoint(serverUrl: URL(string:"http://oakcity.io")!,
+        let endpoint = DummyEndpoint(serverUrl: URL(string: "http://oakcity.io")!,
                                      pathPrefix: "",
                                      method: .delete)
         
@@ -221,7 +142,7 @@ final class EndpointTests: XCTestCase {
         let jsonData = try? JSONSerialization.data(withJSONObject: jsonParams, options: [.sortedKeys])
         XCTAssertNotNil(jsonData)
         
-        let endpoint = DummyEndpoint(serverUrl: URL(string:"http://oakcity.io")!,
+        let endpoint = DummyEndpoint(serverUrl: URL(string: "http://oakcity.io")!,
                                      pathPrefix: "",
                                      method: .patch,
                                      jsonParams: jsonParams)
@@ -236,7 +157,7 @@ final class EndpointTests: XCTestCase {
             "xxx": "true"
         ]
         
-        let endpoint = DummyEndpoint(serverUrl: URL(string:"http://oakcity.io")!,
+        let endpoint = DummyEndpoint(serverUrl: URL(string: "http://oakcity.io")!,
                                      pathPrefix: "",
                                      method: .post,
                                      formParams: fParams)
@@ -254,7 +175,7 @@ final class EndpointTests: XCTestCase {
     func testContentType() {
         // form data
         do {
-            let endpoint = DummyEndpoint(serverUrl: URL(string:"http://oakcity.io")!,
+            let endpoint = DummyEndpoint(serverUrl: URL(string: "http://oakcity.io")!,
                                          pathPrefix: "",
                                          method: .post,
                                          formParams: ["larry": "bar"])
@@ -264,7 +185,7 @@ final class EndpointTests: XCTestCase {
         }
         // json data
         do {
-            let endpoint = DummyEndpoint(serverUrl: URL(string:"http://oakcity.io")!,
+            let endpoint = DummyEndpoint(serverUrl: URL(string: "http://oakcity.io")!,
                                          pathPrefix: "",
                                          method: .post,
                                          jsonParams: ["larry": "bar"])
@@ -274,7 +195,7 @@ final class EndpointTests: XCTestCase {
         }
         // explicit content type
         do {
-            let endpoint = DummyEndpoint(serverUrl: URL(string:"http://oakcity.io")!,
+            let endpoint = DummyEndpoint(serverUrl: URL(string: "http://oakcity.io")!,
                                          pathPrefix: "",
                                          contentType: "chemical/x-pdb")
             let contentHeader = endpoint.urlRequest()?.allHTTPHeaderFields?["Content-Type"]
@@ -291,7 +212,7 @@ final class EndpointTests: XCTestCase {
         let encodedData = loginData.base64EncodedString()
         let expectedHeader = "Basic \(encodedData)"
         
-        let endpoint = DummyEndpoint(serverUrl: URL(string:"http://oakcity.io")!,
+        let endpoint = DummyEndpoint(serverUrl: URL(string: "http://oakcity.io")!,
                                      pathPrefix: "",
                                      username: username,
                                      password: password)
@@ -306,7 +227,7 @@ final class EndpointTests: XCTestCase {
         let randomString = UUID().uuidString
         let bodyData = randomString.data(using: .utf8)
         
-        let endpoint = DummyEndpoint(serverUrl: URL(string:"http://oakcity.io")!,
+        let endpoint = DummyEndpoint(serverUrl: URL(string: "http://oakcity.io")!,
                                      pathPrefix: "",
                                      body: bodyData)
         
@@ -319,6 +240,6 @@ final class EndpointTests: XCTestCase {
         ("testDefaults", testDefaults),
         ("testPathAttributes", testPathAttributes),
         ("testQueryParamsAttributes", testQueryParamsAttributes),
-    ("testMethod", testMethod),
+        ("testMethod", testMethod)
     ]
 }

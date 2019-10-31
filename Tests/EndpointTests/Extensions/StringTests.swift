@@ -9,7 +9,7 @@
 @testable import Endpoint
 import XCTest
 
-final class StringTests: XCTestCase {
+class StringTests: XCTestCase {
     
     func testPercentEscaped() {
         // See https://en.wikipedia.org/wiki/Percent-encoding

@@ -9,7 +9,9 @@
 import Endpoint
 import XCTest
 
-final class FileDownloadEndpointTests: XCTestCase {
+class FileDownloadEndpointTests: XCTestCase {
+
+    // swiftlint:disable:next function_body_length
     func testEquality() {
         
         let destinationA = URL(fileURLWithPath: "/tmp/foo.txt")
@@ -76,12 +78,16 @@ final class FileDownloadEndpointTests: XCTestCase {
                                              password: password,
                                              dateFormatter: dateFormatter)
         
-        
         XCTAssertEqual(endpointA, endpointA2)
         XCTAssertNotEqual(endpointA, endpointB)
     }
 
+    func testDownload() {
+        XCTFail("test parsing")
+    }
+    
     static var allTests = [
-        ("testEquality", testEquality)
+        ("testEquality", testEquality),
+        ("testDownload", testDownload)
     ]
 }
