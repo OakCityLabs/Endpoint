@@ -8,12 +8,12 @@
 
 import Foundation
 
-protocol EndpointPageable {
+public protocol EndpointPageable {
     static var perPage: Int { get }
 }
 
 extension Array: EndpointPageable where Element: EndpointPageable {
-    static var perPage: Int {
+    public static var perPage: Int {
         return Element.perPage
     }
 }

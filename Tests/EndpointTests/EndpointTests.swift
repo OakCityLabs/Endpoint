@@ -6,18 +6,115 @@
 //  Copyright © 2019 Oak City Labs. All rights reserved.
 //
 
-@testable import Endpoint
+import Endpoint
 import XCTest
 
+private struct DummyPayload {
+    let name: String
+}
+
+private typealias DummyEndpoint = Endpoint<DummyPayload>
+
 final class EndpointTests: XCTestCase {
-    func testExample() {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct
-        // results.
-//        XCTAssertEqual(Endpoint().text, "Hello, World!")
+    func testEqualitySimple() {
+        
+        let urlA = URL(string: "http://oakcity.io/A/api")!
+        let urlB = URL(string: "http://oakcity.io/B/api")!
+        
+        let endpointA = DummyEndpoint(serverUrl: urlA, pathPrefix: "hello")
+        let endpointA2 = DummyEndpoint(serverUrl: urlA, pathPrefix: "hello")
+        let endpointB = DummyEndpoint(serverUrl: urlB, pathPrefix: "hello")
+
+        XCTAssertEqual(endpointA, endpointA2)
+        XCTAssertNotEqual(endpointA, endpointB)
     }
 
+    func testEquality() {
+        
+        let urlA = URL(string: "http://oakcity.io/A")!
+        let prefix = "api/v1"
+        let objId = "837"
+        let suffix = "followers"
+        let qParams = ["level": "7", "rank": "full"]
+        let jsonParams: [String: Any] = ["bob": "bob", "larry": true, "daryl": 47]
+        let mimeTypes = ["text/text"]
+        let contentType = "json"
+        let statusCodes = Array(189...197)
+        let username = "spock"
+        let password = "hotgreenblooded"
+        let dateFormatter: DateFormatter = {
+            let dFormatter = DateFormatter()
+            dFormatter.timeStyle = .long
+            dFormatter.dateStyle = .none
+            return dFormatter
+        }()
+
+        let endpointA = DummyEndpoint(serverUrl: urlA,
+                                      pathPrefix: prefix,
+                                      method: .patch,
+                                      objId: objId,
+                                      pathSuffix: suffix,
+                                      queryParams: qParams,
+                                      jsonParams: jsonParams,
+                                      mimeTypes: mimeTypes,
+                                      contentType: contentType,
+                                      statusCodes: statusCodes,
+                                      username: username,
+                                      password: password,
+                                      dateFormatter: dateFormatter)
+        let endpointA2 = DummyEndpoint(serverUrl: urlA,
+                                       pathPrefix: prefix,
+                                       method: .patch,
+                                       objId: objId,
+                                       pathSuffix: suffix,
+                                       queryParams: qParams,
+                                       jsonParams: jsonParams,
+                                       mimeTypes: mimeTypes,
+                                       contentType: contentType,
+                                       statusCodes: statusCodes,
+                                       username: username,
+                                       password: password,
+                                       dateFormatter: dateFormatter)
+        
+        let otherSuffix = "favorites"
+        let endpointB = DummyEndpoint(serverUrl: urlA,
+                                      pathPrefix: prefix,
+                                      method: .patch,
+                                      objId: objId,
+                                      pathSuffix: otherSuffix,
+                                      queryParams: qParams,
+                                      jsonParams: jsonParams,
+                                      mimeTypes: mimeTypes,
+                                      contentType: contentType,
+                                      statusCodes: statusCodes,
+                                      username: username,
+                                      password: password,
+                                      dateFormatter: dateFormatter)
+        
+        XCTAssertEqual(endpointA, endpointA2)
+        XCTAssertNotEqual(endpointA, endpointB)
+    }
+    
+    /*
+     init(serverUrl: URL?,
+          pathPrefix: String,
+          method: EndpointHttpMethod = .get,
+          objId: String? = nil,
+          pathSuffix: String? = nil,
+          queryParams: [String: String] = [:],
+          formParams: [String: String] = [:],
+          jsonParams: [String: Any] = [:],
+          mimeTypes: [String] = ["application/json"],
+          contentType: String? = nil,
+          statusCodes: [Int] = Array(200..<300),
+          username: String? = nil,
+          password: String? = nil,
+          body: Data? = nil,
+          dateFormatter: DateFormatter? = nil
+         )
+     */
     static var allTests = [
-        ("testExample", testExample)
+        ("testEqualitySimple", testEqualitySimple),
+        ("testEquality", testEquality)
     ]
 }

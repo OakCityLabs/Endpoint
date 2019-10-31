@@ -8,9 +8,9 @@
 
 import Foundation
 
-class CodableEndpoint<Payload: Codable>: Endpoint<Payload> {
+public class CodableEndpoint<Payload: Codable>: Endpoint<Payload> {
 
-    override func parse(data: Data, page: Int = 0) -> Payload? {
+    override public func parse(data: Data, page: Int = 0) -> Payload? {
 //            let inputStr = String(data: data, encoding: .utf8)
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .formatted(dateFormatter)

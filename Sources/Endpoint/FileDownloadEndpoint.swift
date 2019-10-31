@@ -8,11 +8,11 @@
 
 import Foundation
 
-enum FileDownloadError: Error {
+public enum FileDownloadError: Error {
     case writeDataError
 }
 
-class FileDownloadEndpoint: Endpoint<URL> {
+public class FileDownloadEndpoint: Endpoint<URL> {
     
     override var paging: Bool {         // files don't page
         return false
@@ -20,23 +20,22 @@ class FileDownloadEndpoint: Endpoint<URL> {
     
     let destination: URL
     
-    init(destination: URL,
-         serverUrl: URL?,
-         pathPrefix: String,
-         method: HTTPMethod = .get,
-         objId: String? = nil,
-         pathSuffix: String? = nil,
-         queryParams: [String: String] = [:],
-         formParams: [String: String] = [:],
-         jsonParams: [String: Any] = [:],
-         mimeTypes: [String] = ["application/json"],
-         contentType: String? = nil,
-         statusCodes: [Int] = Array(200..<300),
-         username: String? = nil,
-         password: String? = nil,
-         body: Data? = nil,
-         dateFormatter: DateFormatter? = nil
-        ) {
+    public init(destination: URL,
+                serverUrl: URL?,
+                pathPrefix: String,
+                method: EndpointHttpMethod = .get,
+                objId: String? = nil,
+                pathSuffix: String? = nil,
+                queryParams: [String: String] = [:],
+                formParams: [String: String] = [:],
+                jsonParams: [String: Any] = [:],
+                mimeTypes: [String] = ["application/json"],
+                contentType: String? = nil,
+                statusCodes: [Int] = Array(200..<300),
+                username: String? = nil,
+                password: String? = nil,
+                body: Data? = nil,
+                dateFormatter: DateFormatter? = nil) {
         
         self.destination = destination
         
@@ -57,7 +56,7 @@ class FileDownloadEndpoint: Endpoint<URL> {
                    dateFormatter: dateFormatter)
     }
     
-    override func parse(data: Data, page: Int = 0) -> URL? {
+    override public func parse(data: Data, page: Int = 0) -> URL? {
         do {
             let directory = destination.deletingLastPathComponent()
             try? FileManager.default.createDirectory(at: directory,
@@ -71,4 +70,12 @@ class FileDownloadEndpoint: Endpoint<URL> {
         }
     }
     
+    public override func compareEquality(rhs: Endpoint<URL>) -> Bool {
+        guard let rhs = rhs as? FileDownloadEndpoint else {
+            return false
+        }
+        return destination == rhs.destination
+    }
+    
 }
+
