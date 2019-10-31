@@ -14,7 +14,7 @@ public enum FileDownloadError: Error {
 
 public class FileDownloadEndpoint: Endpoint<URL> {
     
-    override var paging: Bool {         // files don't page
+    override public var paging: Bool {         // files don't page
         return false
     }
     

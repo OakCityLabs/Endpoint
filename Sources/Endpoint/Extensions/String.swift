@@ -17,6 +17,7 @@ extension String {
             .replacingOccurrences(of: "+", with: "%2B")
             .replacingOccurrences(of: "/", with: "%2F")
             .replacingOccurrences(of: " ", with: "+")
+            .replacingOccurrences(of: "*", with: "%2A")
 
         guard let retString = escapedString else {
             assertionFailure("Failed to percent encode string.")

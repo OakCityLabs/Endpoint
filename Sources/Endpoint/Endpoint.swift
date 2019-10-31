@@ -9,23 +9,23 @@
 import Foundation
 
 public class Endpoint<Payload> {
-    let serverUrl: URL?
-    let pathPrefix: String
-    let pathSuffix: String?
-    let objId: String?
-    let method: EndpointHttpMethod
-    let queryParams: [String: String]
-    let formParams: [String: String]
-    let jsonParams: [String: Any]
-    let mimeTypes: [String]
-    let contentType: String?
-    let statusCodes: [Int]
-    let username: String?
-    let password: String?
-    let body: Data?
-    let dateFormatter: DateFormatter
+    public let serverUrl: URL?
+    public let pathPrefix: String
+    public let pathSuffix: String?
+    public let objId: String?
+    public let method: EndpointHttpMethod
+    public let queryParams: [String: String]
+    public let formParams: [String: String]
+    public let jsonParams: [String: Any]
+    public let mimeTypes: [String]
+    public let contentType: String?
+    public let statusCodes: [Int]
+    public let username: String?
+    public let password: String?
+    public let body: Data?
+    public let dateFormatter: DateFormatter
     
-    var jsonBody: Data? {
+    public var jsonBody: Data? {
         guard !jsonParams.isEmpty else {
             return nil
         }
@@ -38,7 +38,7 @@ public class Endpoint<Payload> {
         return try? JSONSerialization.data(withJSONObject: jsonParams, options: options)
     }
     
-    var formBody: Data? {
+    public var formBody: Data? {
         guard !formParams.isEmpty else {
             return nil
         }
@@ -54,15 +54,8 @@ public class Endpoint<Payload> {
         return body
     }
     
-    var paging: Bool {
+    public var paging: Bool {
         return Payload.self is EndpointPageable.Type
-    }
-    
-    var perPage: Int {
-        guard let pageableClass = Payload.self as? EndpointPageable.Type else {
-            return 0
-        }
-        return pageableClass.perPage
     }
     
     public init(serverUrl: URL?,
@@ -101,8 +94,11 @@ public class Endpoint<Payload> {
         return nil
     }
     
-    private func addPath(toUrl baseUrl: URL) -> URL {
-        var url = baseUrl
+    public var url: URL? {
+        guard let serverUrl = serverUrl else {
+            return nil
+        }
+        var url = serverUrl
         if !pathPrefix.isEmpty {
             url.appendPathComponent(pathPrefix)
         }
@@ -117,19 +113,25 @@ public class Endpoint<Payload> {
         return url
     }
     
-    public func requestQueryParams(page: Int = 0) -> [String: String] {
+    public func requestQueryParams(page: Int = 0) -> [String: String]? {
+        guard !queryParams.isEmpty else {
+            return nil
+        }
         var qParams = queryParams
-        if paging {
+        if let pageableClass = Payload.self as? EndpointPageable.Type {
             let pageParams = [
-                "page_size": "\(perPage)",
-                "page_number": "\(page)"
+                pageableClass.perPageLabel: "\(pageableClass.perPage)",
+                pageableClass.pageLabel: "\(page)"
             ]
             qParams = pageParams.merging(qParams) { (_, new) in new }
         }
         return qParams
     }
     
-    public func requestEncodedQueryParams(forQueryParams qParams: [String: String]) -> [URLQueryItem] {
+    public func requestEncodedQueryParams(forQueryParams qParams: [String: String]?) -> [URLQueryItem]? {
+        guard let qParams = qParams else {
+            return nil
+        }
         let percentEncodedQueryItems: [URLQueryItem] = qParams.map { arg in
             let (key, value) = arg
             return URLQueryItem(name: key, value: "\(value)".percentEscaped)
@@ -138,7 +140,7 @@ public class Endpoint<Payload> {
         return percentEncodedQueryItems
     }
     
-    var authorizationHeader: String? {
+    public var authorizationHeader: String? {
         // Basic auth
         if let username = username,
             let loginData = "\(username):\(password ?? "")".data(using: .utf8) {
@@ -148,11 +150,9 @@ public class Endpoint<Payload> {
         return nil
     }
     
-    public func urlRequest(baseUrl: URL, page: Int = 0, extraHeaders: [String: String] = [:]) -> URLRequest? {
+    public func urlRequest(page: Int = 0, extraHeaders: [String: String] = [:]) -> URLRequest? {
         
-        let url = addPath(toUrl: baseUrl)
-        
-        guard var components = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
+        guard let url = url, var components = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
             return nil
         }
         
