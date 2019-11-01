@@ -28,3 +28,41 @@ extension String {
     }
     
 }
+
+extension String {
+    static func *(lhs: String, rhs: Int) -> String {
+        if rhs <= 0 {
+            return ""
+        }
+        
+        if rhs == 1 {
+            return lhs
+        }
+        
+        var result = lhs
+        for _ in 1..<rhs {
+            result += lhs
+        }
+        
+        return result
+    }
+}
+
+//
+//// Make "a" * 4 -> "aaaa"
+//func * (left: String, right: Int) -> String {
+//    if right <= 0 {
+//        return ""
+//    }
+//
+//    if right == 1 {
+//        return left
+//    }
+//
+//    var result = left
+//    for _ in 1..<right {
+//        result += left
+//    }
+//
+//    return result
+//}

@@ -200,7 +200,6 @@ public class Endpoint<Payload> {
 
 extension Endpoint: Equatable {
     public static func ==<Payload>(lhs: Endpoint<Payload>, rhs: Endpoint<Payload>) -> Bool {
-        print("EP ==")
         return (lhs.serverUrl == rhs.serverUrl)
             && (lhs.pathPrefix == rhs.pathPrefix)
             && (lhs.pathSuffix == rhs.pathSuffix)

@@ -1,5 +1,5 @@
 //
-//  HTTPMethod.swift
+//  EndpointHttpMethod.swift
 //  Endpoint
 //
 //  Created by Jay Lyerly on 10/30/19.
