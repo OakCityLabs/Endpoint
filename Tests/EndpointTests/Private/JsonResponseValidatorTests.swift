@@ -1,8 +1,9 @@
 //
-//  File.swift
-//  
+//  JsonResponseValidatorTests.swift
+//  EndpointTests
 //
-//  Created by Jay Lyerly on 11/1/19.
+//  Created by Jay Lyerly on 11/4/19.
+//  Copyright © 2019 Oak City Labs. All rights reserved.
 //
 
 @testable import Endpoint

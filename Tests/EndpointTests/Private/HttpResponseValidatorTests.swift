@@ -1,11 +1,13 @@
 //
-//  File.swift
-//  
+//  HttpResponseValidatorTests.swift
+//  EndpointTests
 //
-//  Created by Jay Lyerly on 11/1/19.
+//  Created by Jay Lyerly on 11/4/19.
+//  Copyright © 2019 Oak City Labs. All rights reserved.
 //
 
 @testable import Endpoint
+import Logging
 import XCTest
 
 private typealias ServerValidationError = ValidationError<EndpointDefaultServerError>
@@ -39,8 +41,6 @@ class HttpResponseValidatorTests: XCTestCase {
         let dummyError = EndpointDefaultServerError(error: "SomeError", reason: "Something happen", detail: "For realz")
         XCTAssertTrue(test(code: 402, error: .paymentRequired, serverError: dummyError))
         XCTAssertTrue(test(code: 405, error: .methodNotAllowed, serverError: dummyError))
-        XCTAssertTrue(test(code: 500, error: .serverError, serverError: dummyError))
-        XCTAssertTrue(test(code: 588, error: .serverError, serverError: dummyError))
         
         XCTAssertTrue(test(code: 600,
                            error: .unknown(600),
@@ -64,6 +64,10 @@ class HttpResponseValidatorTests: XCTestCase {
         XCTAssertTrue(test(code: 401,
                            error: .unauthorized(EndpointDefaultServerError(reason: "Error #7")),
                            serverError: EndpointDefaultServerError(error: nil, reason: "Error #7", detail: nil)))
+
+        XCTAssertTrue(test(code: 505,
+                           error: .serverError(EndpointDefaultServerError(reason: "Error #9")),
+                           serverError: EndpointDefaultServerError(error: nil, reason: "Error #9", detail: nil)))
     }
     
     func testSucess() {
@@ -173,6 +177,7 @@ class HttpResponseValidatorTests: XCTestCase {
     }
     
     func testLogging() {
+        FakeLogHandler.install()
         let validator = HttpResponseValidator(serverErrorType: EndpointDefaultServerError.self)
         let headers = ["Content-Type": "application/json"]
         let url = URL(string: "http://www.oakcity.io")!
@@ -198,16 +203,24 @@ class HttpResponseValidatorTests: XCTestCase {
                             .notFound(EndpointDefaultServerError(reason: "This resource was not found.")))
         }
         
-//        let lines = [
-//            "Request URL: http://www.oakcity.io",
-//            "Request Method: GET",
-//            "Request Headers:     compress: gzip",
-//            "Request Body: {\"update\": \"foo\"}",
-//            "Response code: 404",
-//            "Response Headers:     Content-Type: application/json",
-//            "Response Body: {\"message\":\"This resource was not found.\"}"
-//        ]
-        XCTFail("Fix log checker.")
+        let lines = [
+            "Request URL: http://www.oakcity.io",
+            "Request Method: GET",
+            "Request Headers:     compress: gzip",
+            "Request Body: {\"update\": \"foo\"}",
+            "Response code: 404",
+            "Response Headers:     Content-Type: application/json",
+            "Response Body: {\"reason\":\"This resource was not found.\"}"
+        ]
+        
+        let logStorage = FakeLogStorage.shared
+        
+        let file = "HttpResponseValidator.swift"
+        let function = "performDebug(data:response:request:)"
+        for line in lines {
+            logStorage.assertMessageContains(level: .debug, message: line, file: file, function: function)
+        }
+        
 //        if let logController = metaController.logController as? FakeLogController {
 //            logController.assertLog(contains: "DEBUG")
 //            logController.assertLog(contains: "HttpResponseValidator.swift")

@@ -83,11 +83,45 @@ class FileDownloadEndpointTests: XCTestCase {
     }
 
     func testDownload() {
-        XCTFail("test parsing")
+        let data = UUID().uuidString.data(using: .utf8)!
+        let url = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(UUID().uuidString)
+
+        let serverUrl = URL(string: "http://oakcity.io/foo")!
+        let endpoint = FileDownloadEndpoint(destination: url, serverUrl: serverUrl, pathPrefix: "")
+        
+        // write data to file
+        let writtenUrl = endpoint.parse(data: data)
+        
+        // load data from file
+        let writtenData = try! Data(contentsOf: url)
+        
+        XCTAssertEqual(writtenData, data)
+        XCTAssertEqual(writtenUrl, url)
+
+        // cleanup
+        try! FileManager.default.removeItem(at: url)
+    }
+    
+    func testDownloadFail() {
+        let data = UUID().uuidString.data(using: .utf8)!
+        let url = URL(fileURLWithPath: "/rootfile.dat")
+
+        let serverUrl = URL(string: "http://oakcity.io/foo")!
+        let endpoint = FileDownloadEndpoint(destination: url, serverUrl: serverUrl, pathPrefix: "")
+        
+        // write data to file
+        let writtenUrl = endpoint.parse(data: data)
+        
+        // load data from file
+        let writtenData = try? Data(contentsOf: url)
+        
+        XCTAssertNil(writtenUrl)
+        XCTAssertNil(writtenData)
     }
     
     static var allTests = [
         ("testEquality", testEquality),
-        ("testDownload", testDownload)
+        ("testDownload", testDownload),
+        ("testDownloadFail", testDownloadFail)
     ]
 }

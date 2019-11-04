@@ -13,19 +13,19 @@ enum ValidationError<ServerError: EndpointServerError>: Error {
     case invalidMimeType(String?)
     case invalidUrlResponse
     case noData
-    case serverError                         // All 5xx
-    case badRequest(ServerError?)    // 400 with associated error and description
-    case unauthorized(ServerError?)               // 401
-    case paymentRequired                     // 402
-    case forbidden(ServerError?)     // 403 with associated error and description
-    case notFound(ServerError?)      // 404 with associated error and description
-    case methodNotAllowed                    // 405
+    case serverError(ServerError?)          // All 5xx
+    case badRequest(ServerError?)           // 400 with associated error and description
+    case unauthorized(ServerError?)         // 401
+    case paymentRequired                    // 402
+    case forbidden(ServerError?)            // 403 with associated error and description
+    case notFound(ServerError?)             // 404 with associated error and description
+    case methodNotAllowed                   // 405
     
     init(statusCode: Int, serverError: ServerError?) {
         
         switch statusCode {
         case 500...599:
-            self = .serverError
+            self = .serverError(serverError)
         case 400:
             self = .badRequest(serverError)
         case 401:
@@ -57,18 +57,18 @@ enum ValidationError<ServerError: EndpointServerError>: Error {
             return nil
         case .noData:
             return "Server returned no data."
-        case .serverError:
-            return "A server error has occured."
+        case let .serverError(serverError):
+            return serverError?.reason ?? "A server error has occured."
         case let .badRequest(serverError):
-            return serverError?.detail ?? "The client made a bad request to the server."
+            return serverError?.reason ?? "The client made a bad request to the server."
         case let .unauthorized(serverError):
-            return serverError?.detail ?? "The user is unauthorized."
+            return serverError?.reason ?? "The user is unauthorized."
         case .paymentRequired:
             return nil
         case let .forbidden(serverError):
-            return serverError?.detail ?? "Access is forbidden."
+            return serverError?.reason ?? "Access is forbidden."
         case let .notFound(serverError):
-            return serverError?.detail ?? "The requested resource was not found on the server."
+            return serverError?.reason ?? "The requested resource was not found on the server."
         case .methodNotAllowed:
             return nil
         }

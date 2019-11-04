@@ -14,42 +14,42 @@ extension NSNotification.Name {
     static let endpointServerNotResponding = Notification.Name("EndpointServerNotResponding")    // Server not responding
 }
 
-class EndpointController<ServerError: EndpointServerError> {
+public class EndpointController<ServerError: EndpointServerError> {
     
     private let session: URLSession
     private(set) var extraHeaders = [String: String]()
     private let logger: Logger
     private let reachability: Reachability
     
-    init(session: URLSession = URLSession(configuration: URLSessionConfiguration.default),
-         serverErrorType: ServerError.Type,
-         logger: Logger = Logger(label: "com.oakcity.endpoint.logger"),
-         reachability: Reachability = Reachability()) {
-
+    public init(session: URLSession = URLSession(configuration: URLSessionConfiguration.default),
+                serverErrorType: ServerError.Type,
+                logger: Logger = Logger(label: "com.oakcity.endpoint.logger"),
+                reachability: Reachability = Reachability()) {
+        
         self.logger = logger
         self.reachability = reachability
         self.session = session
     }
     
-    func removeAuthToken() {
+    public func removeAuthToken() {
         extraHeaders.removeValue(forKey: "Authorization")
     }
     
-    func addAuthBearer(authToken: String) {
+    public func addAuthBearer(authToken: String) {
         logger.debug("Setting auth token to: \(authToken)")
         extraHeaders["Authorization"] = "Bearer \(authToken)"
     }
     
-    func reset(completion: (() -> Void)? = nil) {
+    public func reset(completion: (() -> Void)? = nil) {
         session.reset {
             completion?()
         }
     }
     
-    func load<Payload>(_ resource: Endpoint<Payload>,
-                       page: Int = 0,
-                       synchronous: Bool = false,
-                       completion: @escaping (Result<Data, Error>) -> Void) {
+    public func load<Payload>(_ endpoint: Endpoint<Payload>,
+                              page: Int = 0,
+                              synchronous: Bool = false,
+                              completion: @escaping (Result<Payload, Error>) -> Void) {
         
         guard reachability.isConnectedToNetwork() else {
             logger.info("Server is unreachable")
@@ -58,11 +58,11 @@ class EndpointController<ServerError: EndpointServerError> {
             return
         }
         
-        guard let serverUrl = resource.serverUrl,
-            let req = resource.urlRequest(page: page, extraHeaders: extraHeaders) else {
-            assertionFailure("Failed to create urlRequest in `load`")
-            completion(.failure(EndpointError.urlRequestCreation))
-            return
+        guard let serverUrl = endpoint.serverUrl,
+            let req = endpoint.urlRequest(page: page, extraHeaders: extraHeaders) else {
+                assertionFailure("Failed to create urlRequest in `load`")
+                completion(.failure(EndpointError.urlRequestCreation))
+                return
         }
         
         // If synchronous is requested, make a sempaphore
@@ -81,19 +81,19 @@ class EndpointController<ServerError: EndpointServerError> {
             // print data: po String(data: data, encoding: .utf8)
             let validator = HttpResponseValidator(serverErrorType: ServerError.self,
                                                   logger: self.logger,
-                                                  acceptedMimeTypes: resource.mimeTypes,
-                                                  acceptedStatusCodes: resource.statusCodes)
+                                                  acceptedMimeTypes: endpoint.mimeTypes,
+                                                  acceptedStatusCodes: endpoint.statusCodes)
             let validationResult = validator.validate(data: data,
                                                       response: urlResponse,
                                                       request: req)
-                        
+            
             if case ValidationResult.failure(let error) = validationResult {
                 completion(.failure(error))
                 return
             }
             
-            if let data = data {
-                completion(.success(data))
+            if let data = data, let obj = endpoint.parse(data: data) {
+                completion(.success(obj))
             } else {
                 completion(.failure(EndpointError.parseError))
             }
@@ -102,7 +102,7 @@ class EndpointController<ServerError: EndpointServerError> {
         
         semaphore?.wait()
     }
-
+    
     private func process(networkError error: Error?) -> EndpointError? {
         if let error = error as NSError?, error.code == NSURLErrorCancelled {
             return .requestCancelled

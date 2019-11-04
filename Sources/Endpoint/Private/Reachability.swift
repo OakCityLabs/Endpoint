@@ -9,9 +9,11 @@
 import Foundation
 import SystemConfiguration
 
-public class Reachability {
+open class Reachability {
 
-    func isConnectedToNetwork() -> Bool {
+    public init() {}          // mark this as accessible from outside
+    
+    open func isConnectedToNetwork() -> Bool {
         var zeroAddress = sockaddr_in()
         zeroAddress.sin_len = UInt8(MemoryLayout.size(ofValue: zeroAddress))
         zeroAddress.sin_family = sa_family_t(AF_INET)

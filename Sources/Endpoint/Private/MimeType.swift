@@ -18,12 +18,12 @@ struct MimeType {
     var isWildcard: Bool { return type == "*" && subtype == "*" }
     
     func matches(_ mime: MimeType) -> Bool {
-        switch (type, subtype) {
-        case (mime.type, mime.subtype), (mime.type, "*"), ("*", mime.subtype), ("*", "*"):
+        // true if either is a wildcard
+        if mime.isWildcard || self.isWildcard {
             return true
-        default:
-            return false
         }
+        
+        return (mime.type == self.type) && (mime.subtype == mime.subtype)
     }
     
 }
@@ -36,8 +36,12 @@ extension MimeType {
         let components: [String] = {
             let stripped = string.trimmingCharacters(in: .whitespacesAndNewlines)
             let split = stripped[..<(stripped.range(of: ";")?.lowerBound ?? stripped.endIndex)]
-            return split.components(separatedBy: "/")
+            return split.components(separatedBy: "/").map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
         }()
+        
+        guard components.count == 2 else {
+            return nil
+        }
         
         if let type = components.first, let subtype = components.last {
             self.type = type

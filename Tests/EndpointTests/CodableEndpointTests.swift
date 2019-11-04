@@ -9,10 +9,65 @@
 import Endpoint
 import XCTest
 
+class FakeUrlSession: URLSession {
+    
+    let data: Data?
+    let urlResponse: URLResponse?
+    let error: Error?
+    
+    init(data: Data?, urlResponse: URLResponse?, error: Error?) {
+        self.data = data
+        self.urlResponse = urlResponse
+        self.error = error
+        super.init()
+    }
+    
+    override func dataTask(with request: URLRequest,
+                           completionHandler: @escaping (Data?, URLResponse?, Error?) -> Void) -> URLSessionDataTask {
+        completionHandler(data, urlResponse, error)
+        return URLSessionDataTask()
+    }
+    
+}
+
+class FakeReachability: Reachability {
+    override func isConnectedToNetwork() -> Bool {
+        return true
+    }
+}
+
 class CodableEndpointTests: XCTestCase {
     
     func testParse() {
-        XCTFail("test parsing")
+        let data = User.sampleJsonData!
+        let serverUrl = URL(string: "https://oakcity.io/foo/bar/baz/1")!
+        
+        let endpoint = CodableEndpoint<User>(serverUrl: serverUrl, pathPrefix: "")
+        
+        let httpHeaders = [
+            "Content-Type": "application/json"
+        ]
+        let urlResponse = HTTPURLResponse(url: serverUrl,
+                                          statusCode: 200,
+                                          httpVersion: "1.1",
+                                          headerFields: httpHeaders)
+    
+        let fakeUrlSession = FakeUrlSession(data: data, urlResponse: urlResponse, error: nil)
+        let controller =
+            EndpointController<EndpointDefaultServerError>(session: fakeUrlSession,
+                                                           serverErrorType: EndpointDefaultServerError.self,
+                                                           reachability: FakeReachability())
+
+        controller.load(endpoint) {result in
+            switch result {
+            case .success(let user):
+                XCTAssertEqual(user.objId, 949)
+                XCTAssertEqual(user.firstName, "Larry")
+                XCTAssertEqual(user.lastName, "Bird")
+            case .failure(let error):
+                XCTFail("Failed to load endpoint with error: \(error)")
+            }
+        }
     }
     
     func testMimeTypes() {
@@ -24,9 +79,7 @@ class CodableEndpointTests: XCTestCase {
     }
     
     func testDateFormatter() {
-        XCTFail("test date formatter")
-        
-        XCTFail("Should we provide an basic version of an apiController with validation, etc")
+        XCTFail("test date formatter")        
     }
     
     static var allTests = [
