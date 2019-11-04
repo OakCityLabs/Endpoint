@@ -90,7 +90,7 @@ class FileDownloadEndpointTests: XCTestCase {
         let endpoint = FileDownloadEndpoint(destination: url, serverUrl: serverUrl, pathPrefix: "")
         
         // write data to file
-        let writtenUrl = endpoint.parse(data: data)
+        let writtenUrl = try! endpoint.parse(data: data)
         
         // load data from file
         let writtenData = try! Data(contentsOf: url)
@@ -109,13 +109,12 @@ class FileDownloadEndpointTests: XCTestCase {
         let serverUrl = URL(string: "http://oakcity.io/foo")!
         let endpoint = FileDownloadEndpoint(destination: url, serverUrl: serverUrl, pathPrefix: "")
         
-        // write data to file
-        let writtenUrl = endpoint.parse(data: data)
+        // Should throw trying to write to bogus path
+        XCTAssertThrowsError(try endpoint.parse(data: data))
         
         // load data from file
         let writtenData = try? Data(contentsOf: url)
         
-        XCTAssertNil(writtenUrl)
         XCTAssertNil(writtenData)
     }
     

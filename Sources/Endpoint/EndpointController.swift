@@ -91,9 +91,15 @@ public class EndpointController<ServerError: EndpointServerError> {
                 completion(.failure(error))
                 return
             }
-            
-            if let data = data, let obj = endpoint.parse(data: data) {
-                completion(.success(obj))
+
+            if let data = data {
+                do {
+                    let obj = try endpoint.parse(data: data)
+                    completion(.success(obj))
+                } catch {
+                    completion(.failure(error))  // endpoint.parse failed internally with error
+                    return
+                }
             } else {
                 completion(.failure(EndpointError.parseError))
             }

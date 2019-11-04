@@ -90,8 +90,8 @@ public class Endpoint<Payload> {
         self.dateFormatter = dateFormatter ?? .iso8601Full
     }
     
-    public func parse(data: Data, page: Int = 0) -> Payload? {
-        return nil
+    public func parse(data: Data, page: Int = 0) throws -> Payload {
+        throw EndpointError.noParser
     }
     
     public var url: URL? {

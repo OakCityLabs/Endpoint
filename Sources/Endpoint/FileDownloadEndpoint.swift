@@ -56,18 +56,13 @@ public class FileDownloadEndpoint: Endpoint<URL> {
                    dateFormatter: dateFormatter)
     }
     
-    override public func parse(data: Data, page: Int = 0) -> URL? {
-        do {
-            let directory = destination.deletingLastPathComponent()
-            try? FileManager.default.createDirectory(at: directory,
-                                                     withIntermediateDirectories: true,
-                                                     attributes: nil)
-            try data.write(to: destination, options: [.atomic])
-            return destination
-        } catch {
-            print("Failed to write data to file: \(destination)\nerror: \(error)")
-            return nil
-        }
+    override public func parse(data: Data, page: Int = 0) throws -> URL {
+        let directory = destination.deletingLastPathComponent()
+        try FileManager.default.createDirectory(at: directory,
+                                                 withIntermediateDirectories: true,
+                                                 attributes: nil)
+        try data.write(to: destination, options: [.atomic])
+        return destination
     }
     
     public override func compareEquality(rhs: Endpoint<URL>) -> Bool {

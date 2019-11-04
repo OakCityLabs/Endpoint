@@ -10,15 +10,10 @@ import Foundation
 
 public class CodableEndpoint<Payload: Codable>: Endpoint<Payload> {
 
-    override public func parse(data: Data, page: Int = 0) -> Payload? {
+    override public func parse(data: Data, page: Int = 0) throws -> Payload {
 //            let inputStr = String(data: data, encoding: .utf8)
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .formatted(dateFormatter)
-        do {
-            return try decoder.decode(Payload.self, from: data)
-        } catch {
-            print("Failed to decode server response with error: \(error)")
-            return nil
-        }
+        return try decoder.decode(Payload.self, from: data)
     }
 }

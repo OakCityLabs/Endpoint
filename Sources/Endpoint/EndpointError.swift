@@ -11,6 +11,7 @@ import Foundation
 public enum EndpointError: Error, Equatable {
     case urlRequestCreation
     case parseError
+    case noParser
     case requestCancelled
     case serverUnreachable
     case connectionError
