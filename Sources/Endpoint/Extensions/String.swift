@@ -30,7 +30,7 @@ extension String {
 }
 
 extension String {
-    static func *(lhs: String, rhs: Int) -> String {
+    static func * (lhs: String, rhs: Int) -> String {
         if rhs <= 0 {
             return ""
         }
@@ -47,22 +47,3 @@ extension String {
         return result
     }
 }
-
-//
-//// Make "a" * 4 -> "aaaa"
-//func * (left: String, right: Int) -> String {
-//    if right <= 0 {
-//        return ""
-//    }
-//
-//    if right == 1 {
-//        return left
-//    }
-//
-//    var result = left
-//    for _ in 1..<right {
-//        result += left
-//    }
-//
-//    return result
-//}

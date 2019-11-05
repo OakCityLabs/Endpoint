@@ -1,8 +1,9 @@
 //
 //  Token.swift
-//  
+//  EndpointTests
 //
-//  Created by Jay Lyerly on 11/5/19.
+//  Created by Jay Lyerly on 10/30/19.
+//  Copyright © 2019 Oak City Labs. All rights reserved.
 //
 
 import Foundation

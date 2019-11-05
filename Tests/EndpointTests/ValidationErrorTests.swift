@@ -62,10 +62,10 @@ class ValidationErrorTests: XCTestCase {
         XCTAssertEqual(VError.unauthorized(nil).prettyDescription, "The user is unauthorized.")
 
         XCTAssertNil(VError.paymentRequired.prettyDescription)
-
+        
         let forbiddenError = VError(statusCode: 403, serverError: EndpointDefaultServerError(error: "forbidden",
-                                                                                           reason: "bad robot",
-                                                                                           detail: nil))
+                                                                                             reason: "bad robot",
+                                                                                             detail: nil))
         XCTAssertEqual(forbiddenError.prettyDescription, "bad robot")
         XCTAssertEqual(VError.forbidden(nil).prettyDescription, "Access is forbidden.")
 

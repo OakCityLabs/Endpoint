@@ -26,9 +26,7 @@ class HttpResponseValidatorTests: XCTestCase {
             let data = try! JSONEncoder().encode(serverError)
             let req = URLRequest(url: url)
             
-            let validationResult = validator.validate(data: data,
-                                                      response: response,
-                                                      request: req)
+            let validationResult = validator.validate(data: data, response: response, request: req)
             
             if case ValidationResult.failure(let error) = validationResult {
                 return error as! ValidationError == referenceError
@@ -42,15 +40,9 @@ class HttpResponseValidatorTests: XCTestCase {
         XCTAssertTrue(test(code: 402, error: .paymentRequired, serverError: dummyError))
         XCTAssertTrue(test(code: 405, error: .methodNotAllowed, serverError: dummyError))
         
-        XCTAssertTrue(test(code: 600,
-                           error: .unknown(600),
-                           serverError: dummyError))
-        XCTAssertTrue(test(code: 999,
-                           error: .unknown(999),
-                           serverError: dummyError))
-        XCTAssertTrue(test(code: 001,
-                           error: .unknown(001),
-                           serverError: dummyError))
+        XCTAssertTrue(test(code: 600, error: .unknown(600), serverError: dummyError))
+        XCTAssertTrue(test(code: 999, error: .unknown(999), serverError: dummyError))
+        XCTAssertTrue(test(code: 001, error: .unknown(001), serverError: dummyError))
         
         XCTAssertTrue(test(code: 400,
                            error: .badRequest(EndpointDefaultServerError(reason: "Error #1")),
@@ -190,9 +182,7 @@ class HttpResponseValidatorTests: XCTestCase {
         req.httpBody = "{\"update\": \"foo\"}".data(using: .utf8)!
         req.allHTTPHeaderFields = ["compress": "gzip"]
         
-        let validationResult = validator.validate(data: responseData,
-                                                  response: response,
-                                                  request: req)
+        let validationResult = validator.validate(data: responseData, response: response, request: req)
         
         switch validationResult {
         case .success:
@@ -212,25 +202,12 @@ class HttpResponseValidatorTests: XCTestCase {
             "Response Headers:     Content-Type: application/json",
             "Response Body: {\"reason\":\"This resource was not found.\"}"
         ]
-        
-        let logStorage = FakeLogStorage.shared
-        
+                
         let file = "HttpResponseValidator.swift"
         let function = "performDebug(data:response:request:)"
         for line in lines {
-            logStorage.assertMessageContains(level: .debug, message: line, file: file, function: function)
+            FakeLogStorage.shared.assertMessageContains(level: .debug, message: line, file: file, function: function)
         }
-        
-//        if let logController = metaController.logController as? FakeLogController {
-//            logController.assertLog(contains: "DEBUG")
-//            logController.assertLog(contains: "HttpResponseValidator.swift")
-//            logController.assertLog(contains: "performDebug(data:response:request:)")
-//            for line in lines {
-//                logController.assertLog(contains: line)
-//            }
-//        } else {
-//            XCTFail("Invalid log controller")
-//        }
         
     }
 }

@@ -11,7 +11,7 @@ import Logging
 
 extension NSNotification.Name {
     static let endpointServerUnreachable = Notification.Name("EndpointServerUnreachable")    // Reachability failure
-    static let endpointServerNotResponding = Notification.Name("EndpointServerNotResponding")    // Server not responding
+    static let endpointServerNotResponding = Notification.Name("EndpointServerNotResponding")  // Server not responding
 }
 
 public class EndpointController<ServerError: EndpointServerError> {

@@ -59,8 +59,8 @@ public class FileDownloadEndpoint: Endpoint<URL> {
     override public func parse(data: Data, page: Int = 0) throws -> URL {
         let directory = destination.deletingLastPathComponent()
         try FileManager.default.createDirectory(at: directory,
-                                                 withIntermediateDirectories: true,
-                                                 attributes: nil)
+                                                withIntermediateDirectories: true,
+                                                attributes: nil)
         try data.write(to: destination, options: [.atomic])
         return destination
     }

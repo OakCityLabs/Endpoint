@@ -86,6 +86,7 @@ struct FakeLogHandler: LogHandler {
        return FakeLogHandler()
     }()
     
+    // swiftlint:disable:next function_parameter_count
     func log(level: Logger.Level,
              message: Logger.Message,
              metadata: Logger.Metadata?,
