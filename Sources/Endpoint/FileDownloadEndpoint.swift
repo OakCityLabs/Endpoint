@@ -12,7 +12,7 @@ public enum FileDownloadError: Error {
     case writeDataError
 }
 
-public class FileDownloadEndpoint: Endpoint<URL> {
+open class FileDownloadEndpoint: Endpoint<URL> {
     
     override public var paging: Bool {         // files don't page
         return false
@@ -56,7 +56,7 @@ public class FileDownloadEndpoint: Endpoint<URL> {
                    dateFormatter: dateFormatter)
     }
     
-    override public func parse(data: Data, page: Int = 0) throws -> URL {
+    open override func parse(data: Data, page: Int = 0) throws -> URL {
         let directory = destination.deletingLastPathComponent()
         try FileManager.default.createDirectory(at: directory,
                                                 withIntermediateDirectories: true,
@@ -65,7 +65,7 @@ public class FileDownloadEndpoint: Endpoint<URL> {
         return destination
     }
     
-    public override func compareEquality(rhs: Endpoint<URL>) -> Bool {
+    open override func compareEquality(rhs: Endpoint<URL>) -> Bool {
         guard let rhs = rhs as? FileDownloadEndpoint else {
             return false
         }

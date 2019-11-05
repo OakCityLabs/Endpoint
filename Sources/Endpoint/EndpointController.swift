@@ -14,7 +14,7 @@ extension NSNotification.Name {
     static let endpointServerNotResponding = Notification.Name("EndpointServerNotResponding")  // Server not responding
 }
 
-public class EndpointController<ServerError: EndpointServerError> {
+open class EndpointController<ServerError: EndpointServerError> {
     
     private let session: URLSession
     private(set) var extraHeaders = [String: String]()
@@ -29,22 +29,22 @@ public class EndpointController<ServerError: EndpointServerError> {
         self.session = session
     }
     
-    public func removeAuthToken() {
+    open func removeAuthToken() {
         extraHeaders.removeValue(forKey: "Authorization")
     }
     
-    public func addAuthBearer(authToken: String) {
+    open func addAuthBearer(authToken: String) {
         logger.debug("Setting auth token to: \(authToken)")
         extraHeaders["Authorization"] = "Bearer \(authToken)"
     }
     
-    public func reset(completion: (() -> Void)? = nil) {
+    open func reset(completion: (() -> Void)? = nil) {
         session.reset {
             completion?()
         }
     }
     
-    public func load<Payload>(_ endpoint: Endpoint<Payload>,
+    open func load<Payload>(_ endpoint: Endpoint<Payload>,
                               page: Int = 0,
                               synchronous: Bool = false,
                               completion: @escaping (Result<Payload, Error>) -> Void) {
@@ -106,7 +106,7 @@ public class EndpointController<ServerError: EndpointServerError> {
         semaphore?.wait()
     }
     
-    private func process(networkError error: Error?) -> EndpointError? {
+    open func process(networkError error: Error?) -> EndpointError? {
         if let error = error as NSError?, error.code == NSURLErrorCancelled {
             return .requestCancelled
         }

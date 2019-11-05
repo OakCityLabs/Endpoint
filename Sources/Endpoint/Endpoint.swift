@@ -8,7 +8,7 @@
 
 import Foundation
 
-public class Endpoint<Payload> {
+open class Endpoint<Payload> {
     public let serverUrl: URL?
     public let pathPrefix: String
     public let pathSuffix: String?
@@ -25,7 +25,7 @@ public class Endpoint<Payload> {
     public let body: Data?
     public let dateFormatter: DateFormatter
     
-    public var jsonBody: Data? {
+    open var jsonBody: Data? {
         guard !jsonParams.isEmpty else {
             return nil
         }
@@ -38,7 +38,7 @@ public class Endpoint<Payload> {
         return try? JSONSerialization.data(withJSONObject: jsonParams, options: options)
     }
     
-    public var formBody: Data? {
+    open var formBody: Data? {
         guard !formParams.isEmpty else {
             return nil
         }
@@ -54,7 +54,7 @@ public class Endpoint<Payload> {
         return body
     }
     
-    public var paging: Bool {
+    open var paging: Bool {
         return Payload.self is EndpointPageable.Type
     }
     
@@ -90,11 +90,11 @@ public class Endpoint<Payload> {
         self.dateFormatter = dateFormatter ?? .iso8601Full
     }
     
-    public func parse(data: Data, page: Int = 0) throws -> Payload {
+    open func parse(data: Data, page: Int = 0) throws -> Payload {
         throw EndpointError.noParser
     }
     
-    public var url: URL? {
+    open var url: URL? {
         guard let serverUrl = serverUrl else {
             return nil
         }
@@ -113,7 +113,7 @@ public class Endpoint<Payload> {
         return url
     }
     
-    public func requestQueryParams(page: Int = 0) -> [String: String]? {
+    open func requestQueryParams(page: Int = 0) -> [String: String]? {
         guard !queryParams.isEmpty else {
             return nil
         }
@@ -128,7 +128,7 @@ public class Endpoint<Payload> {
         return qParams
     }
     
-    public func requestEncodedQueryParams(forQueryParams qParams: [String: String]?) -> [URLQueryItem]? {
+    open func requestEncodedQueryParams(forQueryParams qParams: [String: String]?) -> [URLQueryItem]? {
         guard let qParams = qParams else {
             return nil
         }
@@ -140,7 +140,7 @@ public class Endpoint<Payload> {
         return percentEncodedQueryItems
     }
     
-    public var authorizationHeader: String? {
+    open var authorizationHeader: String? {
         // Basic auth
         if let username = username,
             let loginData = "\(username):\(password ?? "")".data(using: .utf8) {
@@ -150,7 +150,7 @@ public class Endpoint<Payload> {
         return nil
     }
     
-    public func urlRequest(page: Int = 0, extraHeaders: [String: String] = [:]) -> URLRequest? {
+    open func urlRequest(page: Int = 0, extraHeaders: [String: String] = [:]) -> URLRequest? {
         
         guard let url = url, var components = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
             return nil
@@ -193,7 +193,7 @@ public class Endpoint<Payload> {
     
     // This is a hack to provide a hook for comparing subclasses since the compiler
     // doesn't seem to like overriding === in a concrete subclass of a generic
-    public func compareEquality(rhs: Endpoint<Payload>) -> Bool {
+    open func compareEquality(rhs: Endpoint<Payload>) -> Bool {
         return true
     }
 }
