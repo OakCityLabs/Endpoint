@@ -6,7 +6,7 @@
 //  Copyright © 2019 Oak City Labs. All rights reserved.
 //
 
-@testable import Endpoint
+import Endpoint
 import XCTest
 
 typealias VError = ValidationError<EndpointDefaultServerError>

@@ -8,7 +8,7 @@
 
 import Foundation
 
-enum ValidationError<ServerError: EndpointServerError>: Error {
+public enum ValidationError<ServerError: EndpointServerError>: Error {
     case unknown(Int)                       // Unknown with attached status code
     case invalidMimeType(String?)
     case invalidUrlResponse
@@ -21,7 +21,7 @@ enum ValidationError<ServerError: EndpointServerError>: Error {
     case notFound(ServerError?)             // 404 with associated error and description
     case methodNotAllowed                   // 405
     
-    init(statusCode: Int, serverError: ServerError?) {
+    public init(statusCode: Int, serverError: ServerError?) {
         
         switch statusCode {
         case 500...599:
@@ -43,7 +43,7 @@ enum ValidationError<ServerError: EndpointServerError>: Error {
         }
     }
     
-    var prettyDescription: String? {
+    public var prettyDescription: String? {
         switch self {
         case .unknown:
             return "An unknown error has occured."
@@ -78,7 +78,7 @@ enum ValidationError<ServerError: EndpointServerError>: Error {
 
 extension ValidationError: Equatable {
     //swiftlint:disable:next cyclomatic_complexity function_body_length
-    static func == (lhs: ValidationError, rhs: ValidationError) -> Bool {
+    public static func == (lhs: ValidationError, rhs: ValidationError) -> Bool {
         switch lhs {
         case .unknown:
             switch rhs {

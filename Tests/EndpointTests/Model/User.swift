@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  User.swift
 //  
 //
 //  Created by Jay Lyerly on 11/4/19.
@@ -27,5 +27,3 @@ struct User: Codable {
     """.data(using: .utf8)
 
 }
-
-

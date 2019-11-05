@@ -19,10 +19,14 @@ public struct EndpointDefaultServerError: EndpointServerError {
     public let error: String?
     public let reason: String?
     public let detail: String?
-}
+    
+    public init(error: String?, reason: String?, detail: String?) {
+        self.error = error
+        self.reason = reason
+        self.detail = detail
+    }
 
-public extension EndpointDefaultServerError {
-    init(reason: String?) {
+    public init(reason: String?) {
         self.reason = reason
         error = nil
         detail = nil
