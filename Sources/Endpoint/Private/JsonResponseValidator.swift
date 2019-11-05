@@ -11,8 +11,7 @@ import Logging
 
 class JsonResponseValidator<ServerError: EndpointServerError>: HttpResponseValidator<ServerError> {
     
-    init(serverErrorType: ServerError.Type,
-         logger: Logger = Logger(label: "com.oakcity.endpoint.jsonresponsevalidator")) {
-        super.init(serverErrorType: serverErrorType, logger: logger, acceptedMimeTypes: ["application/json"])
+    init(serverErrorType: ServerError.Type) {
+        super.init(serverErrorType: serverErrorType, acceptedMimeTypes: ["application/json"])
     }
 }

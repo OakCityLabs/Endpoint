@@ -31,17 +31,15 @@ class HttpResponseValidator<ServerError: EndpointServerError> {
     
     private let acceptedMimeTypes: [MimeType]
     private let acceptedStatusCodes: [Int]
-    private let logger: Logger
+    private let logger = Logger(label: "com.oakcity.endpoint.httpresponsevalidator")
     private let maxHttpResponseSize: Int
     private let debugAllHttp: Bool
     
     init(serverErrorType: ServerError.Type,
-         logger: Logger = Logger(label: "com.oakcity.endpoint.httpresponsevalidator"),
          acceptedMimeTypes mTypes: [String] = ["*/*"],
          acceptedStatusCodes codes: [Int] = Array(200..<300),
          maxHttpResponseSize: Int = 5_000,
          debugAllHttp: Bool = false) {
-        self.logger = logger
         self.maxHttpResponseSize = maxHttpResponseSize
         self.debugAllHttp = debugAllHttp
         acceptedMimeTypes = mTypes.compactMap { MimeType($0) }

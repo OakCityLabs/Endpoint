@@ -18,15 +18,13 @@ public class EndpointController<ServerError: EndpointServerError> {
     
     private let session: URLSession
     private(set) var extraHeaders = [String: String]()
-    private let logger: Logger
+    private let logger = Logger(label: "com.oakcity.endpoint.logger")
     private let reachability: Reachability
     
     public init(session: URLSession = URLSession(configuration: URLSessionConfiguration.default),
                 serverErrorType: ServerError.Type,
-                logger: Logger = Logger(label: "com.oakcity.endpoint.logger"),
                 reachability: Reachability = Reachability()) {
         
-        self.logger = logger
         self.reachability = reachability
         self.session = session
     }
@@ -80,7 +78,6 @@ public class EndpointController<ServerError: EndpointServerError> {
             
             // print data: po String(data: data, encoding: .utf8)
             let validator = HttpResponseValidator(serverErrorType: ServerError.self,
-                                                  logger: self.logger,
                                                   acceptedMimeTypes: endpoint.mimeTypes,
                                                   acceptedStatusCodes: endpoint.statusCodes)
             let validationResult = validator.validate(data: data,
