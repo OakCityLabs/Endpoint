@@ -63,7 +63,6 @@ class MimeTypeTests: XCTestCase {
         XCTAssertNil(MimeType(nil))
         XCTAssertNil(MimeType("foo/bar/baz"))
     }
-
     
     static var allTests = [
         ("testWildcard", testWildcard),

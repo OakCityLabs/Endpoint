@@ -181,7 +181,7 @@ class CodableEndpointTests: XCTestCase {
             let calendar = Calendar.current
             let dateComponents = DateComponents(calendar: calendar,
                                                 timeZone: TimeZone(secondsFromGMT: 0),
-                                                year: 2020,
+                                                year: 2_020,
                                                 month: 12,
                                                 day: 31)
             return calendar.date(from: dateComponents)!

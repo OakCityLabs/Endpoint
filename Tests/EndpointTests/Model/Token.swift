@@ -19,5 +19,3 @@ struct Token: Codable {
     """.data(using: .utf8)
 
 }
-
-

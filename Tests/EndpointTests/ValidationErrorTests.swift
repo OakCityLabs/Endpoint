@@ -63,7 +63,7 @@ class ValidationErrorTests: XCTestCase {
 
         XCTAssertNil(VError.paymentRequired.prettyDescription)
 
-        let forbiddenError = VError(statusCode: 403, serverError:  EndpointDefaultServerError(error: "forbidden",
+        let forbiddenError = VError(statusCode: 403, serverError: EndpointDefaultServerError(error: "forbidden",
                                                                                            reason: "bad robot",
                                                                                            detail: nil))
         XCTAssertEqual(forbiddenError.prettyDescription, "bad robot")
