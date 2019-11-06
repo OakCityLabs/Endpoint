@@ -19,11 +19,11 @@ open class EndpointController<ServerError: EndpointServerError> {
     private let session: URLSession
     private(set) var extraHeaders = [String: String]()
     private let logger = Logger(label: "com.oakcity.endpoint.logger")
-    private let reachability: Reachability
+    private let reachability: ReachabilityTester
     
     public init(session: URLSession = URLSession(configuration: URLSessionConfiguration.default),
                 serverErrorType: ServerError.Type,
-                reachability: Reachability = Reachability()) {
+                reachability: ReachabilityTester = ReachabilityTester()) {
         
         self.reachability = reachability
         self.session = session

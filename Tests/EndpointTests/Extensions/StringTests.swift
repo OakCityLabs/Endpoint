@@ -37,7 +37,17 @@ class StringTests: XCTestCase {
         XCTAssertEqual("ab cd".percentEscaped, "ab+cd")
     }
 
+    func testMultipy() {
+        XCTAssertEqual("abcd" * -1, "")
+        XCTAssertEqual("abcd" * 0, "")
+        XCTAssertEqual("abcd" * 1, "abcd")
+        XCTAssertEqual("abcd" * 2, "abcdabcd")
+        XCTAssertEqual("abcd" * 3, "abcdabcdabcd")
+        XCTAssertEqual("abcd" * 4, "abcdabcdabcdabcd")
+    }
+
     static var allTests = [
-        ("testPercentEscaped", testPercentEscaped)
+        ("testPercentEscaped", testPercentEscaped),
+        ("testMultipy", testMultipy)
     ]
 }

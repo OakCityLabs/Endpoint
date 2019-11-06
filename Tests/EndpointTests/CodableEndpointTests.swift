@@ -30,7 +30,7 @@ class FakeUrlSession: URLSession {
     
 }
 
-class FakeReachability: Reachability {
+class FakeReachability: ReachabilityTester {
     override func isConnectedToNetwork() -> Bool {
         return true
     }

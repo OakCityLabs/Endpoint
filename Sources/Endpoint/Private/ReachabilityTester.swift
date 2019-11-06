@@ -1,5 +1,5 @@
 //
-//  Reachability.swift
+//  ReachabilityTester.swift
 //  Endpoint
 //
 //  Created by Jay Lyerly on 10/30/19.
@@ -9,7 +9,7 @@
 import Foundation
 import SystemConfiguration
 
-open class Reachability {
+open class ReachabilityTester {
 
     public init() {}          // mark this as accessible from outside
     
