@@ -22,7 +22,6 @@ open class EndpointController<ServerError: EndpointServerError> {
     private let reachability: ReachabilityTester
     
     public init(session: URLSession = URLSession(configuration: URLSessionConfiguration.default),
-                serverErrorType: ServerError.Type,
                 reachability: ReachabilityTester = ReachabilityTester()) {
         
         self.reachability = reachability
@@ -44,22 +43,26 @@ open class EndpointController<ServerError: EndpointServerError> {
         }
     }
     
+    open func urlRequest<Payload>(forEndpoint endpoint: Endpoint<Payload>, page: Int) -> URLRequest? {
+        return endpoint.urlRequest(page: page, extraHeaders: extraHeaders)
+    }
+    
     open func load<Payload>(_ endpoint: Endpoint<Payload>,
                               page: Int = 0,
                               synchronous: Bool = false,
-                              completion: @escaping (Result<Payload, Error>) -> Void) {
+                              completion: ((Result<Payload, Error>) -> Void)? = nil) {
         
         guard reachability.isConnectedToNetwork() else {
             logger.info("Server is unreachable")
-            completion(.failure(EndpointError.serverUnreachable))
+            completion?(.failure(EndpointError.serverUnreachable))
             NotificationCenter.default.post(Notification(name: .endpointServerUnreachable))
             return
         }
         
         guard let serverUrl = endpoint.serverUrl,
-            let req = endpoint.urlRequest(page: page, extraHeaders: extraHeaders) else {
+            let req = urlRequest(forEndpoint: endpoint, page: page) else {
                 assertionFailure("Failed to create urlRequest in `load`")
-                completion(.failure(EndpointError.urlRequestCreation))
+                completion?(.failure(EndpointError.urlRequestCreation))
                 return
         }
         
@@ -72,7 +75,7 @@ open class EndpointController<ServerError: EndpointServerError> {
             }
             
             if let apiError = self.process(networkError: error) {
-                completion(.failure(apiError))
+                completion?(.failure(apiError))
                 return
             }
             
@@ -85,20 +88,20 @@ open class EndpointController<ServerError: EndpointServerError> {
                                                       request: req)
             
             if case ValidationResult.failure(let error) = validationResult {
-                completion(.failure(error))
+                completion?(.failure(error))
                 return
             }
 
             if let data = data {
                 do {
                     let obj = try endpoint.parse(data: data)
-                    completion(.success(obj))
+                    completion?(.success(obj))
                 } catch {
-                    completion(.failure(error))  // endpoint.parse failed internally with error
+                    completion?(.failure(error))  // endpoint.parse failed internally with error
                     return
                 }
             } else {
-                completion(.failure(EndpointError.parseError))
+                completion?(.failure(EndpointError.parseError))
             }
             
         }.resume()

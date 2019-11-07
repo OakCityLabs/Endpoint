@@ -55,7 +55,6 @@ class CodableEndpointTests: XCTestCase {
         let fakeUrlSession = FakeUrlSession(data: data, urlResponse: urlResponse, error: nil)
         let controller =
             EndpointController<EndpointDefaultServerError>(session: fakeUrlSession,
-                                                           serverErrorType: EndpointDefaultServerError.self,
                                                            reachability: FakeReachability())
 
         controller.load(endpoint) {result in
@@ -88,7 +87,6 @@ class CodableEndpointTests: XCTestCase {
         let fakeUrlSession = FakeUrlSession(data: data, urlResponse: urlResponse, error: nil)
         let controller =
             EndpointController<EndpointDefaultServerError>(session: fakeUrlSession,
-                                                           serverErrorType: EndpointDefaultServerError.self,
                                                            reachability: FakeReachability())
         
         controller.load(endpoint) {result in
@@ -121,7 +119,6 @@ class CodableEndpointTests: XCTestCase {
         let fakeUrlSession = FakeUrlSession(data: data, urlResponse: urlResponse, error: nil)
         let controller =
             EndpointController<EndpointDefaultServerError>(session: fakeUrlSession,
-                                                           serverErrorType: EndpointDefaultServerError.self,
                                                            reachability: FakeReachability())
         
         // endpoint777 should work
@@ -174,7 +171,6 @@ class CodableEndpointTests: XCTestCase {
         let fakeUrlSession = FakeUrlSession(data: data, urlResponse: urlResponse, error: nil)
         let controller =
             EndpointController<EndpointDefaultServerError>(session: fakeUrlSession,
-                                                           serverErrorType: EndpointDefaultServerError.self,
                                                            reachability: FakeReachability())
         
         let expectedDate: Date = {

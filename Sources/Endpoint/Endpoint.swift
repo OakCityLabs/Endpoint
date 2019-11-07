@@ -174,7 +174,9 @@ open class Endpoint<Payload> {
             headers["Content-Type"] = contentType
         }
         
-        headers["Authorization"] = authorizationHeader
+        if let authorizationHeader = authorizationHeader {
+            headers["Authorization"] = authorizationHeader
+        }
         
         var req = URLRequest(url: cUrl)
         req.httpMethod = method.rawValue
