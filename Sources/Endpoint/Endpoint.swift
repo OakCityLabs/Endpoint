@@ -121,7 +121,7 @@ open class Endpoint<Payload> {
         if let pageableClass = Payload.self as? EndpointPageable.Type {
             let pageParams = [
                 pageableClass.perPageLabel: "\(pageableClass.perPage)",
-                pageableClass.pageLabel: "\(page)"
+                pageableClass.pageLabel: "\(page + pageableClass.pageOffset)"
             ]
             qParams = pageParams.merging(qParams) { (_, new) in new }
         }

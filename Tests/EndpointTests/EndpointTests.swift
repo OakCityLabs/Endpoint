@@ -37,6 +37,9 @@ extension OtherPagingPayload: EndpointPageable {
     static var pageLabel: String {
         return "sheet"
     }
+    static var pageOffset: Int {
+        return -1
+    }
 }
 
 class EndpointTests: XCTestCase {
@@ -119,7 +122,7 @@ class EndpointTests: XCTestCase {
             XCTAssertEqual(qParamString.count, "foo=bar&baz=1&sheet=2&how_many=5309".count)
             XCTAssertTrue(qParamString.contains("foo=bar"))
             XCTAssertTrue(qParamString.contains("baz=1"))
-            XCTAssertTrue(qParamString.contains("sheet=2"))
+            XCTAssertTrue(qParamString.contains("sheet=1"))     // page offset of -1
             XCTAssertTrue(qParamString.contains("how_many=5309"))
         }
         
