@@ -48,9 +48,9 @@ open class EndpointController<ServerError: EndpointServerError> {
     }
     
     open func load<Payload>(_ endpoint: Endpoint<Payload>,
-                              page: Int = 1,
-                              synchronous: Bool = false,
-                              completion: ((Result<Payload, Error>) -> Void)? = nil) {
+                            page: Int = 1,
+                            synchronous: Bool = false,
+                            completion: ((Result<Payload, Error>) -> Void)? = nil) {
         
         guard reachability.isConnectedToNetwork() else {
             logger.info("Server is unreachable")
@@ -75,9 +75,7 @@ open class EndpointController<ServerError: EndpointServerError> {
             }
             
             if let apiError = self.process(networkError: error) {
-                DispatchQueue.performOnMainThread {
-                    completion?(.failure(apiError))
-                }
+                DispatchQueue.performOnMainThread { completion?(.failure(apiError)) }
                 return
             }
             
@@ -90,28 +88,21 @@ open class EndpointController<ServerError: EndpointServerError> {
                                                       request: req)
             
             if case ValidationResult.failure(let error) = validationResult {
-                DispatchQueue.performOnMainThread {
-                    completion?(.failure(error))
-                }
+                DispatchQueue.performOnMainThread { completion?(.failure(error)) }
                 return
             }
 
             if let data = data {
                 do {
                     let obj = try endpoint.parse(data: data)
-                    DispatchQueue.performOnMainThread {
-                        completion?(.success(obj))
-                    }
+                    DispatchQueue.performOnMainThread { completion?(.success(obj)) }
                 } catch {
-                    DispatchQueue.performOnMainThread {
-                        completion?(.failure(error))  // endpoint.parse failed internally with error
-                    }
+                    // endpoint.parse failed internally with error
+                    DispatchQueue.performOnMainThread { completion?(.failure(error)) }
                     return
                 }
             } else {
-                DispatchQueue.performOnMainThread {
-                    completion?(.failure(EndpointError.parseError))
-                }
+                DispatchQueue.performOnMainThread { completion?(.failure(EndpointError.parseError)) }
             }
             
         }.resume()

@@ -83,61 +83,68 @@ class EndpointTests: XCTestCase {
             "baz": "1"
         ]
         
-        do {
-            let endpoint = DummyEndpoint(serverUrl: URL(string: "http://oakcity.io")!,
-                                         pathPrefix: "",
-                                         queryParams: qParams)
-
-            let qParamSubSeq = (endpoint.urlRequest()?.url?.absoluteString.split(separator: "?").last)!
-            let qParamString = String(qParamSubSeq)
-            XCTAssertNotNil(qParamString)
-            XCTAssertEqual(qParamString.count, "foo=bar&baz=1".count)
-            XCTAssertTrue(qParamString.contains("foo=bar"))
-            XCTAssertTrue(qParamString.contains("baz=1"))
-        }
+        let endpoint = DummyEndpoint(serverUrl: URL(string: "http://oakcity.io")!,
+                                     pathPrefix: "",
+                                     queryParams: qParams)
         
-        do {
-            // No parameters, default page should be 1
-            let endpoint = DummyPagingEndpoint(serverUrl: URL(string: "http://oakcity.io")!, pathPrefix: "")
-
-            let qParamSubSeq = (endpoint.urlRequest()?.url?.absoluteString.split(separator: "?").last)!
-            let qParamString = String(qParamSubSeq)
-            XCTAssertNotNil(qParamString)
-            XCTAssertEqual(qParamString.count, "page=1&per_page=30".count)
-            XCTAssertTrue(qParamString.contains("page=1"))
-            XCTAssertTrue(qParamString.contains("per_page=30"))
-        }
+        let qParamSubSeq = (endpoint.urlRequest()?.url?.absoluteString.split(separator: "?").last)!
+        let qParamString = String(qParamSubSeq)
+        XCTAssertNotNil(qParamString)
+        XCTAssertEqual(qParamString.count, "foo=bar&baz=1".count)
+        XCTAssertTrue(qParamString.contains("foo=bar"))
+        XCTAssertTrue(qParamString.contains("baz=1"))
+    }
+    
+    func testPagingNoQueryParamsAttributes() {
+        // No parameters, default page should be 1
+        let endpoint = DummyPagingEndpoint(serverUrl: URL(string: "http://oakcity.io")!, pathPrefix: "")
         
-        do {
-            let endpoint = DummyPagingEndpoint(serverUrl: URL(string: "http://oakcity.io")!,
-                                               pathPrefix: "",
-                                               queryParams: qParams)
-
-            let qParamSubSeq = (endpoint.urlRequest(page: 2)?.url?.absoluteString.split(separator: "?").last)!
-            let qParamString = String(qParamSubSeq)
-            XCTAssertNotNil(qParamString)
-            XCTAssertEqual(qParamString.count, "foo=bar&baz=1&page=2&per_page=30".count)
-            XCTAssertTrue(qParamString.contains("foo=bar"))
-            XCTAssertTrue(qParamString.contains("baz=1"))
-            XCTAssertTrue(qParamString.contains("page=2"))
-            XCTAssertTrue(qParamString.contains("per_page=30"))
-        }
+        let qParamSubSeq = (endpoint.urlRequest()?.url?.absoluteString.split(separator: "?").last)!
+        let qParamString = String(qParamSubSeq)
+        XCTAssertNotNil(qParamString)
+        XCTAssertEqual(qParamString.count, "page=1&per_page=30".count)
+        XCTAssertTrue(qParamString.contains("page=1"))
+        XCTAssertTrue(qParamString.contains("per_page=30"))
+    }
+    
+    func testPageableQueryParamsAttributes() {
+        let qParams = [
+            "foo": "bar",
+            "baz": "1"
+        ]
         
-        do {
-            let endpoint = OtherPagingEndpoint(serverUrl: URL(string: "http://oakcity.io")!,
-                                               pathPrefix: "",
-                                               queryParams: qParams)
-
-            let qParamSubSeq = (endpoint.urlRequest(page: 2)?.url?.absoluteString.split(separator: "?").last)!
-            let qParamString = String(qParamSubSeq)
-            XCTAssertNotNil(qParamString)
-            XCTAssertEqual(qParamString.count, "foo=bar&baz=1&sheet=2&how_many=5309".count)
-            XCTAssertTrue(qParamString.contains("foo=bar"))
-            XCTAssertTrue(qParamString.contains("baz=1"))
-            XCTAssertTrue(qParamString.contains("sheet=1"))     // page offset of -1
-            XCTAssertTrue(qParamString.contains("how_many=5309"))
-        }
+        let endpoint = DummyPagingEndpoint(serverUrl: URL(string: "http://oakcity.io")!,
+                                           pathPrefix: "",
+                                           queryParams: qParams)
         
+        let qParamSubSeq = (endpoint.urlRequest(page: 2)?.url?.absoluteString.split(separator: "?").last)!
+        let qParamString = String(qParamSubSeq)
+        XCTAssertNotNil(qParamString)
+        XCTAssertEqual(qParamString.count, "foo=bar&baz=1&page=2&per_page=30".count)
+        XCTAssertTrue(qParamString.contains("foo=bar"))
+        XCTAssertTrue(qParamString.contains("baz=1"))
+        XCTAssertTrue(qParamString.contains("page=2"))
+        XCTAssertTrue(qParamString.contains("per_page=30"))
+    }
+    
+    func testQueryParamsAttributesCustomPaging() {
+        let qParams = [
+            "foo": "bar",
+            "baz": "1"
+        ]
+        
+        let endpoint = OtherPagingEndpoint(serverUrl: URL(string: "http://oakcity.io")!,
+                                           pathPrefix: "",
+                                           queryParams: qParams)
+        
+        let qParamSubSeq = (endpoint.urlRequest(page: 2)?.url?.absoluteString.split(separator: "?").last)!
+        let qParamString = String(qParamSubSeq)
+        XCTAssertNotNil(qParamString)
+        XCTAssertEqual(qParamString.count, "foo=bar&baz=1&sheet=2&how_many=5309".count)
+        XCTAssertTrue(qParamString.contains("foo=bar"))
+        XCTAssertTrue(qParamString.contains("baz=1"))
+        XCTAssertTrue(qParamString.contains("sheet=1"))     // page offset of -1
+        XCTAssertTrue(qParamString.contains("how_many=5309"))
     }
     
     func testMethod() {
