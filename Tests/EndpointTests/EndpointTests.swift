@@ -97,6 +97,18 @@ class EndpointTests: XCTestCase {
         }
         
         do {
+            // No parameters, default page should be 1
+            let endpoint = DummyPagingEndpoint(serverUrl: URL(string: "http://oakcity.io")!, pathPrefix: "")
+
+            let qParamSubSeq = (endpoint.urlRequest()?.url?.absoluteString.split(separator: "?").last)!
+            let qParamString = String(qParamSubSeq)
+            XCTAssertNotNil(qParamString)
+            XCTAssertEqual(qParamString.count, "page=1&per_page=30".count)
+            XCTAssertTrue(qParamString.contains("page=1"))
+            XCTAssertTrue(qParamString.contains("per_page=30"))
+        }
+        
+        do {
             let endpoint = DummyPagingEndpoint(serverUrl: URL(string: "http://oakcity.io")!,
                                                pathPrefix: "",
                                                queryParams: qParams)

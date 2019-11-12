@@ -90,7 +90,7 @@ open class Endpoint<Payload> {
         self.dateFormatter = dateFormatter ?? .iso8601Full
     }
     
-    open func parse(data: Data, page: Int = 0) throws -> Payload {
+    open func parse(data: Data, page: Int = 1) throws -> Payload {
         throw EndpointError.noParser
     }
     
@@ -113,19 +113,25 @@ open class Endpoint<Payload> {
         return url
     }
     
-    open func requestQueryParams(page: Int = 0) -> [String: String]? {
-        guard !queryParams.isEmpty else {
-            return nil
-        }
-        var qParams = queryParams
+    open func requestQueryParams(page: Int = 1) -> [String: String]? {
+        let pageParams: [String: String]
         if let pageableClass = Payload.self as? EndpointPageable.Type {
-            let pageParams = [
+            pageParams = [
                 pageableClass.perPageLabel: "\(pageableClass.perPage)",
                 pageableClass.pageLabel: "\(page + pageableClass.pageOffset)"
             ]
-            qParams = pageParams.merging(qParams) { (_, new) in new }
+        } else {
+            pageParams = [:]
         }
-        return qParams
+
+        let qParams = pageParams.merging(queryParams) { (_, new) in new }
+        
+        // Don't return an empty dict, return nil instead
+        if qParams.isEmpty {
+            return nil
+        } else {
+            return qParams
+        }
     }
     
     open func requestEncodedQueryParams(forQueryParams qParams: [String: String]?) -> [URLQueryItem]? {
@@ -150,7 +156,7 @@ open class Endpoint<Payload> {
         return nil
     }
     
-    open func urlRequest(page: Int = 0, extraHeaders: [String: String] = [:]) -> URLRequest? {
+    open func urlRequest(page: Int = 1, extraHeaders: [String: String] = [:]) -> URLRequest? {
         
         guard let url = url, var components = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
             return nil

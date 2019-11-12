@@ -56,7 +56,7 @@ open class FileDownloadEndpoint: Endpoint<URL> {
                    dateFormatter: dateFormatter)
     }
     
-    open override func parse(data: Data, page: Int = 0) throws -> URL {
+    open override func parse(data: Data, page: Int = 1) throws -> URL {
         let directory = destination.deletingLastPathComponent()
         try FileManager.default.createDirectory(at: directory,
                                                 withIntermediateDirectories: true,

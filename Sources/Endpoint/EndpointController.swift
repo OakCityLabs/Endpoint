@@ -48,7 +48,7 @@ open class EndpointController<ServerError: EndpointServerError> {
     }
     
     open func load<Payload>(_ endpoint: Endpoint<Payload>,
-                              page: Int = 0,
+                              page: Int = 1,
                               synchronous: Bool = false,
                               completion: ((Result<Payload, Error>) -> Void)? = nil) {
         
