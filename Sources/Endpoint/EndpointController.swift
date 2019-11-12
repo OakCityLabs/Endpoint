@@ -75,7 +75,9 @@ open class EndpointController<ServerError: EndpointServerError> {
             }
             
             if let apiError = self.process(networkError: error) {
-                completion?(.failure(apiError))
+                DispatchQueue.performOnMainThread {
+                    completion?(.failure(apiError))
+                }
                 return
             }
             
@@ -88,20 +90,28 @@ open class EndpointController<ServerError: EndpointServerError> {
                                                       request: req)
             
             if case ValidationResult.failure(let error) = validationResult {
-                completion?(.failure(error))
+                DispatchQueue.performOnMainThread {
+                    completion?(.failure(error))
+                }
                 return
             }
 
             if let data = data {
                 do {
                     let obj = try endpoint.parse(data: data)
-                    completion?(.success(obj))
+                    DispatchQueue.performOnMainThread {
+                        completion?(.success(obj))
+                    }
                 } catch {
-                    completion?(.failure(error))  // endpoint.parse failed internally with error
+                    DispatchQueue.performOnMainThread {
+                        completion?(.failure(error))  // endpoint.parse failed internally with error
+                    }
                     return
                 }
             } else {
-                completion?(.failure(EndpointError.parseError))
+                DispatchQueue.performOnMainThread {
+                    completion?(.failure(EndpointError.parseError))
+                }
             }
             
         }.resume()
