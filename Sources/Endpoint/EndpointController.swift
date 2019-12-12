@@ -91,7 +91,7 @@ open class EndpointController<ServerError: EndpointServerError> {
         guard let serverUrl = endpoint.serverUrl,
             let req = urlRequest(forEndpoint: endpoint, page: page) else {
                 assertionFailure("Failed to create urlRequest in `load`")
-                completion?(.failure(EndpointError.urlRequestCreation))
+                completion?(.failure(EndpointError.urlRequestCreationError))
                 return
         }
         

@@ -7,6 +7,7 @@ Endpoint objects describe a network (REST) endpoint and can parse its data.
 An Endpoint object describes a network API endpoint.  
 It contains all the information needed to request data from an endpoint and can parse the data returned by the API server.  
 Organizing endpoints this way makes the code more testable and more organized.
+An EndpointController manages downloading the data for and Endpoint and handling errors that may occur.
 
 
 ## Table of Contents
@@ -208,9 +209,13 @@ let endpointController = EndpointController<EndpointDefaultServerError>()
 
 ```
 
+#### Notifications
+
+
+
 ### CodableEndpoint
 
-`CodableEndpoint` is an `Endpoint` subclass where `Payload` must conform to `Codable`.  The `parse()` method of `CodableEndpoint` uses a `JSONDecoder()` to convert the raw data into a `Payload` object.
+`CodableEndpoint` is an `Endpoint` subclass where `Payload` must conform to `Codable`.  The `parse()` method of `CodableEndpoint` uses a `JSONDecoder` to convert the raw data into a `Payload` object.
 
 Here's an example using a `CodableEndpoint` to retrieve an OAuth token.
 
@@ -220,31 +225,56 @@ struct Token: Codable {
     let type: String
     let duration: Int
     let value: String
-    
-    enum CodingKeys: String, CodingKey {
-        case type = "token_type"
-        case duration = "expires_in"
-        case value = "access_token"
-    }   
 }
 
 let formParms = [
     "grant_type": "client_credentials",
-    "client_id": ApiCredentials.clientId,
-    "client_secret": ApiCredentials.clientSecret
+    "client_id": clientId,
+    "client_secret": clientSecret
 ]
-let tokenEndpoint = CodableEndpoint<Token>(serverUrl: Config.apiUrl,
+let tokenEndpoint = CodableEndpoint<Token>(serverUrl: URL(string: "http://www.foo.com/")!,
                                            pathPrefix: "oauth2/token",
                                            method: .post,
                                            formParams: formParms)
 
+let endpointController = EndpointController<EndpointDefaultServerError>() 
+
+endpointController.load(tokenEndpoint) { (result) in
+    switch result {
+    case .success(let token):
+        print("Success! Received token: \(token)")
+    case .failure(let error):
+        print("Failure! Error: \(error)")
+    }
+}
 ```
 
 ### FileDownloadEndpoint
 
+`FileDownloadEndpoint` is an `Endpoint` subclass that abuses the idea a little bit.  Instead of the `parse()` method converting data to an object, it writes the data to a local file and returns the URL to that file.  Initialization is just like the base Endpoint class, with the addition of a `destination` parameter that indicates where the data should be written to.  The `parse()` method will attempt to create any parent directories in the URL that don't exist.  After the `parse()` method is comlete and the file is written to local disk, the `destination` URL is returned through the completation block.  Because parsing returns the `Payload` which is a `URL`, the `FileDownloadEndpoint` is subclassed from `Endpoint<URL>`.
 
+Here's an example using a `FileDownloadEndpoint` to download a file.  The CSV file at URL `http://www.foo.com/data/foo.csv` is downloaded to `/tmp/foo.csv`.
 
-### Example
+```swift
+let destinationURL = URL(fileURLWithPath: "/tmp/foo.csv")
+let csvEndpoint = CodableEndpoint<Token>(destination: destinationURL,
+                                           serverUrl: URL(string: "http://www.foo.com/")!,
+                                           pathPrefix: "data/foo.csv")
+
+let endpointController = EndpointController<EndpointDefaultServerError>() 
+
+endpointController.load(csvEndpoint) { (result) in
+    switch result {
+    case .success(let url):
+        print("Success! File written to: \(url)")
+    case .failure(let error):
+        print("Failure! Error: \(error)")
+    }
+}
+```
+
+## Logging
+
 
 
 ## SwiftPM
