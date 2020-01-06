@@ -1,12 +1,12 @@
 # Endpoint
 
-Endpoint objects describe a network (REST) endpoint and can parse its data.
+An Endpoint object describes a network (REST) endpoint and can parse its data.
 
 ## TL;DR
 
-An Endpoint object describes a network API endpoint.  
+An Endpoint object describes a network API endpoint, including REST endpoints.
 It contains all the information needed to request data from an endpoint and can parse the data returned by the API server.  
-Organizing endpoints this way makes the code more testable and more organized.
+Organizing endpoints this way makes the code more testable and more organized, separating network boiler plate from endpoint specific data handling.
 An EndpointController manages downloading the data for and Endpoint and handling errors that may occur.
 
 ## Table of Contents
@@ -31,9 +31,9 @@ We built the Endpoint library after watching the "Tiny Networking Library" episo
 The main goal of the library is to represent a remote API endpoint.  
 The Endpoint object contains everything you need to know to make a request to an API endpoint and how to parse the results.  
 
-Separating out the endpoint definition and parsing functionality makes unit testing much easier.  You can define parameters for an endpoint and check the generated URL agains known values.  Likewise, you can use known test data to exercise the parsing routine and validate the output.  Unit testing network code can be tricky, but by moving the parsing code into a separate object, we remove the networking aspect and drastically simplify the unit testing.
+Separating out the endpoint definition and parsing functionality makes unit testing much easier.  You can define parameters for an endpoint and check the generated URL against known values.  Likewise, you can use known test data to exercise the parsing routine and validate the output.  Unit testing network code can be tricky, but by moving the parsing code into a separate object, we remove the networking aspect and drastically simplify the unit testing.
 
-Breaking endpoints out into separate objects is also great for the organization of our projects.  The tendency is to put endpoint handling into a massive and ever-increasing network controller, where you add a method for each new endpoint.  Even with a simple project, you quickly wind up with a giant monolithic controller that hard to read and maintain.  Moving to the endpoint model, everything becomes simple.  The network controller only has to retrieve data from the network and handle communication (HTTP) errors.  You can organize the endpoint objects naturally, for example, making factory methods in an extension to their associated object type.
+Breaking endpoints out into separate objects is also great for the organization of our projects.  The tendency is to put endpoint handling into a massive and ever-increasing network controller, where you add a method for each new endpoint.  Even with a simple project, you quickly wind up with a giant monolithic controller that is hard to read and maintain.  Moving to the endpoint model, everything becomes simple.  The network controller only has to retrieve data from the network and handle communication (HTTP) errors.  You can organize the endpoint objects naturally, for example, making factory methods in an extension to their associated object type.
 
 We also include an EndpointController object that handles making network requests with Endpoints.  EndpointController uses URLSession to retrieve Endpoint data and check for errors.
 
@@ -41,9 +41,9 @@ We also include an EndpointController object that handles making network request
 
 ### Endpoint Base Class
 
-The `Endpoint` class wraps all the data to define an network API endpoint, usually a REST endpoint.  It is generic over a `Payload`, the type of object returned by the endpoint.  For example, if you have an endpoint that retrieves information about a restaurant, the `Payload` type would be a `Restaurant`, eg `Resource<Restaurant>`.  
+The `Endpoint` class wraps all the data to define a network API endpoint, usually a REST endpoint.  It is generic over a `Payload`, the type of object returned by the endpoint.  For example, if you have an endpoint that retrieves information about a restaurant, the `Payload` type would be a `Restaurant`, eg `Resource<Restaurant>`.  
 
-The base `Endpoint` class is an abstract class.  It defines a common interface and some default behavior, but you should subclass the base class for a particular type of `PayLoad` object.  The library includes two subclasses  -- [CodableEndpoint](#codableendpoint) and [FileDownloadEndpoint](#filedownloadendpoint).
+The base `Endpoint` class is an abstract class.  It defines a common interface and some default behavior, but has an empty `parse()` routine.  You should subclass the base class for a particular type of `PayLoad` object.  The library includes two subclasses  -- [CodableEndpoint](#codableendpoint) and [FileDownloadEndpoint](#filedownloadendpoint).
 
 #### Initialization
 
@@ -58,7 +58,7 @@ Then we can create an Endpoint to represent the URL.
                                  pathPrefix: "bar")
 ```
 
-Like many REST services, when we build servers, they use a particular pattern for accessing objects.
+Like many REST services, the servers we build use a particular pattern for accessing objects.
 
 `http://foo.com/<base_path>/<object_type>/<object_id>/<detail_path>?<query_params>
 
@@ -92,7 +92,7 @@ The default HTTP method when creating an endpoint is `GET`, but the `method` par
 
 #### HTTP Body Data
 
-Endpoint supports several methods for building the body of an HTTP request, including JSON, form parameters or custom data.  Any endpoint that includes data for the body of the HTTP request should be using the `.post` HTTP method.
+Endpoint supports several methods for building the body of an HTTP request, including JSON, form parameters or custom data.  Any endpoint that includes data for the body of the HTTP request should be using the `.post` or `.patch` HTTP methods.
 
 To create an JSON request, specify the dictionary of values when creating the Endpoint with the `jsonParams` parameter to the `init` method.  This dictionary will be JSON encoded to a data block used as the body of URLRequest.
 
@@ -102,7 +102,7 @@ If neither of those is suitable, like with multi-part form data, you can supply 
 
 #### DateFormatter
 
-The `dateFormatter` parameter holds a `DateFormatter` object.  The base class doesn't do anything with this, but it's useful for subclasses that needs a `DateFormatter` for parsing data, such as the [`CodableEndpoint`](#codableendpoint).
+The `dateFormatter` parameter holds a `DateFormatter` object.  The base class doesn't do anything with this, but it's useful for subclasses that needs a `DateFormatter` for parsing date types, such as the [`CodableEndpoint`](#codableendpoint).
 
 #### URL Request
 
@@ -122,7 +122,7 @@ Endpoints that return lots of data are often paged.  An `Endpoint` supports pagi
     extension MyPayloadClass: EndpoingPageable {}
 ```
 
-This is the default implementation that provides the names of parameters sent to the server for paging.  
+This is the default implementation that provides the parameters sent to the server for paging.  
 
 ```swift
 public extension EndpointPageable {
@@ -146,11 +146,11 @@ public extension EndpointPageable {
 
 The `page` and `perPageLabel` are the names of the query parameters sent to the server indicating the page requested and the number of items per page, respectively.
 The `perPage` attribute is the numerical value sent with the `perPageLabel` to specify the number of items per page of data.
-Finally `pageOffset` is a modifier on the page number before it's sent to the server.  The `Endpoint` class uses 1-based indexing for the pages.  If your server uses 0-based indexing, you can set `pageOffset` to -1 to make it work. 
+Finally `pageOffset` is a modifier on the page number before it's sent to the server.  The `Endpoint` class uses 1-based indexing for the pages.  If your server uses 0-based indexing, you can set `pageOffset` to -1 to make it match. 
 
 ### EndpointController
 
-The Endpoint package contains an EndpointController class that handles the loading of data from the Endpoints.  An app usually only needs one EndpointController instance.  You can reuse this controller over and over to load data for various Endpoints, so the controller is a long lived object.  Endpoints, on the other hand, are typically created, loaded and then released.
+The Endpoint package contains an EndpointController class that handles the loading of data from the Endpoints.  An app usually only needs one EndpointController instance.  You can reuse this controller over and over to load data for various `Endpoints`, so the controller is a long lived object.  A single `Endpoint`, on the other hand, is typically created, loaded and then released.
 
 The EndpointController is built on URLSession and has two main functions, sending data to the server and receiving data from the server.  The controller uses an Endpoint to create a URLRequest and makes the network request to the server.  When the data arrives from the server, the controller parses the data with the Endpoint's `parse` method or handles any error that occurred in the exchange.
 
@@ -217,11 +217,11 @@ let endpointController = EndpointController<EndpointDefaultServerError>()
 The `EndpointController` emits several notifications to alert other components in the system when important network events occur.  These are all instances of `Notification.Name`:
 
    * `endpointServerUnreachable`
-      * The controller cannot reach the server via the network because no network is available.  This can happen if a phone has no cell signal or WiFi connection.  This is a device side network issue.
+      * The controller cannot reach the server because no network is available.  This can happen if a phone has no cell signal or WiFi connection.  This is a client side network issue.
    * `endpointServerNotResponding`
       * The device has a network connection, but the server is not responding to network requests.  This usually indicates that the server is down or there is a network problem on the server end.
    * `endpointValidationError401Unauthorized`
-      * The server has responded to a REST call with a 401 'Unauthorized' error.  This might be a good time to open a login dialog so the user can enter new (valid) credentials.
+      * The server has responded to a REST call with a 401 'Unauthorized' error.  This might be a good time to open a login dialog so the user can enter new credentials.
 
 ### CodableEndpoint
 
@@ -261,9 +261,9 @@ endpointController.load(tokenEndpoint) { (result) in
 
 ### FileDownloadEndpoint
 
-`FileDownloadEndpoint` is an `Endpoint` subclass that abuses the idea a little bit.
+`FileDownloadEndpoint` is an `Endpoint` subclass that abuses the `Endpoint` idea a little bit.
 Instead of the `parse()` method converting data to an object, it writes the data to a local file and returns the URL to that file.
-Initialization is just like the base Endpoint class, with the addition of a `destination` parameter that indicates where `parse()` method should write the data.
+Initialization is just like the base Endpoint class, with the addition of a `destination` parameter that indicates where the `parse()` method should write the data.
 The `parse()` method will attempt to create any parent directories in the URL that don't exist.
 After the `parse()` method finishes writing the file to local disk, the `destination` URL is returned through the completion block.
 Because parsing returns the `Payload` which is a `URL`, the `FileDownloadEndpoint` is subclassed from `Endpoint<URL>`.
@@ -272,9 +272,9 @@ Here's an example using a `FileDownloadEndpoint` to download a file.  The CSV fi
 
 ```swift
 let destinationURL = URL(fileURLWithPath: "/tmp/foo.csv")
-let csvEndpoint = CodableEndpoint<Token>(destination: destinationURL,
-                                           serverUrl: URL(string: "http://www.foo.com/")!,
-                                           pathPrefix: "data/foo.csv")
+let csvEndpoint = FileDownloadEndpoint(destination: destinationURL,
+                                      serverUrl: URL(string: "http://www.foo.com/")!,
+                                      pathPrefix: "data/foo.csv")
 
 let endpointController = EndpointController<EndpointDefaultServerError>() 
 
@@ -290,7 +290,7 @@ endpointController.load(csvEndpoint) { (result) in
 
 ## Logging
 
-
+The `Endpoint` package uses the standard [Logging API for Swift](https://github.com/apple/swift-log).  This allows the library to emit logging info at various levels but leaves it up to you, the consumer of the library, to decide the logging destination -- console, file, logging service, etc.  See the [Logging API for Swift](https://github.com/apple/swift-log) project page for basic setup examples.
 
 ## SwiftPM
 
