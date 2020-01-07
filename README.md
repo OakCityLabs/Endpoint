@@ -15,7 +15,7 @@ An EndpointController manages downloading the data for and Endpoint and handling
 - [Usage](#usage)
   - [Endpoint Base Class](#endpoint-base-class)
   - [EndpointController](#endpointcontroller)
-  - [CodableEndpoint](#codeableendpoint)
+  - [CodableEndpoint](#codableendpoint)
   - [FileDownloadEndpoint](#filedownloadendpoint)
 - [Logging](#logging)
 - [SwiftPM](#swiftpm)
