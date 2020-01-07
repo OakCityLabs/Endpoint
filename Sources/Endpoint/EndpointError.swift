@@ -9,12 +9,12 @@
 import Foundation
 
 public enum EndpointError: Error, Equatable {
-    case urlRequestCreation
+    case urlRequestCreationError
     case parseError
     case noParser
     case requestCancelled
     case serverUnreachable
     case connectionError
-    case missingBackroundSession
+    case missingBackgroundSession
     case unknownError
 }

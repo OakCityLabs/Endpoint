@@ -25,6 +25,7 @@ open class Endpoint<Payload> {
     public let body: Data?
     public let dateFormatter: DateFormatter
     
+    /// Encode the `jsonParams` attribute to a JSON `Data` block for use as the HTTP body of a request
     open var jsonBody: Data? {
         guard !jsonParams.isEmpty else {
             return nil
@@ -38,6 +39,7 @@ open class Endpoint<Payload> {
         return try? JSONSerialization.data(withJSONObject: jsonParams, options: options)
     }
     
+    /// Encode the `formParams` attribute to a url encoded form data block for use as the HTTP body of a request
     open var formBody: Data? {
         guard !formParams.isEmpty else {
             return nil
@@ -54,10 +56,33 @@ open class Endpoint<Payload> {
         return body
     }
     
+    // Determin if the Payload type supports paging
     open var paging: Bool {
         return Payload.self is EndpointPageable.Type
     }
     
+    /// Initialize an Endpoint instance
+    ///
+    /// Parameter descriptions are in reference to this example URL
+    ///
+    /// `http://foo.com/api/v1.0/users/277/followers?expand=1`
+    ///
+    /// - Parameters:
+    ///   - serverUrl: Shared prefix for the URLs - `http://foo.com/api/v1.0`
+    ///   - pathPrefix: Path portion after `serverUrl` and before the object ID - `users`
+    ///   - method: HTTP method, one of .get, .post, .patch, .delete
+    ///   - objId:  Identifier for the object - `277`
+    ///   - pathSuffix: Path portion after the object ID - `followers`
+    ///   - queryParams: Dictionary of query parameters appended to the URL - `expand=1`
+    ///   - formParams: Form parameter dictionary sent in the body of the request (application/x-www-form-urlencoded)
+    ///   - jsonParams: Parameters dictionary sent in the body of the request encoded as JSON (application/json)
+    ///   - mimeTypes: Array of valid mime types for the data returned from the server
+    ///   - contentType: Content type for the HTTP request sent to the server
+    ///   - statusCodes: Array of valid status codes in the HTTP response from the server
+    ///   - username: Username for Basic HTTP Authorization header (`Authorization: Basic XXXXXXXXXXXXXXXX`)
+    ///   - password: Password for Basic HTTP Authorization header (`Authorization: Basic XXXXXXXXXXXXXXXX`)
+    ///   - body: Data to be used verbatim as the HTTP body
+    ///   - dateFormatter: DateFormatter object to be used during parsing to decode Date/Time objects
     public init(serverUrl: URL?,
                 pathPrefix: String,
                 method: EndpointHttpMethod = .get,
@@ -90,10 +115,18 @@ open class Endpoint<Payload> {
         self.dateFormatter = dateFormatter ?? .iso8601Full
     }
     
+    
+    /// The `parse` method of the `Endpoint` takes the data retrieved from the server (often JSON encoded)
+    /// and returns an instance of the `Payload`.
+    /// - Parameters:
+    ///   - data: Raw `Data` object, usually the network response from the server
+    ///   - page: For paginated data, the page retrieved.  This might be used by `parse` implementations to determine
+    ///     if the results should overwrite an existing result or appended to it.
     open func parse(data: Data, page: Int = 1) throws -> Payload {
         throw EndpointError.noParser
     }
     
+    /// Generate the URL portion of the URLRequest without the query parameters
     open var url: URL? {
         guard let serverUrl = serverUrl else {
             return nil
@@ -113,6 +146,7 @@ open class Endpoint<Payload> {
         return url
     }
     
+    /// Assemble the query parameters dictionary for the URLRequest by combining `queryParams` with paging attributes
     open func requestQueryParams(page: Int = 1) -> [String: String]? {
         let pageParams: [String: String]
         if let pageableClass = Payload.self as? EndpointPageable.Type {
@@ -134,6 +168,7 @@ open class Endpoint<Payload> {
         }
     }
     
+    /// Encode the query parameter dictionary to a URLQueryItem array by percent escaping the strings
     open func requestEncodedQueryParams(forQueryParams qParams: [String: String]?) -> [URLQueryItem]? {
         guard let qParams = qParams else {
             return nil
@@ -146,6 +181,8 @@ open class Endpoint<Payload> {
         return percentEncodedQueryItems
     }
     
+    /// Build an auth header for the URLRequest.  The base class does this by using the username and password, if
+    /// defined to create an HTTP Basic Authorization value.
     open var authorizationHeader: String? {
         // Basic auth
         if let username = username,
@@ -156,6 +193,11 @@ open class Endpoint<Payload> {
         return nil
     }
     
+    
+    /// Return a URLRequest associated with this endpoint configuration
+    /// - Parameters:
+    ///   - page: For paginated endpoints, which page to retrieve. This is a 1 based index.
+    ///   - extraHeaders: Dictionary of extra headers to be added to the request
     open func urlRequest(page: Int = 1, extraHeaders: [String: String] = [:]) -> URLRequest? {
         
         guard let url = url, var components = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
