@@ -14,11 +14,10 @@ An EndpointController manages downloading the data for and Endpoint and handling
 - [Motivation](#motivation)
 - [Usage](#usage)
   - [Endpoint Base Class](#endpoint-base-class)
-  - [Key Mapping](#key-mapping)
-  - [Ignored Attributes](#ignored-attributes)
-  - [Raw JSON Substrings](#raw-json-substrings)
-  - [REST Envelopes](#rest-envelopes)
-  - [Example](#example)
+  - [EndpointController](#endpointcontroller)
+  - [CodableEndpoint](#codeableendpoint)
+  - [FileDownloadEndpoint](#filedownloadendpoint)
+- [Logging](#logging)
 - [SwiftPM](#swiftpm)
 - [Changelog](#changelog)
 - [License](#license)
@@ -94,7 +93,7 @@ The default HTTP method when creating an endpoint is `GET`, but the `method` par
 
 Endpoint supports several methods for building the body of an HTTP request, including JSON, form parameters or custom data.  Any endpoint that includes data for the body of the HTTP request should be using the `.post` or `.patch` HTTP methods.
 
-To create an JSON request, specify the dictionary of values when creating the Endpoint with the `jsonParams` parameter to the `init` method.  This dictionary will be JSON encoded to a data block used as the body of URLRequest.
+To create a JSON request, specify the dictionary of values when creating the Endpoint with the `jsonParams` parameter to the `init` method.  This dictionary will be JSON encoded to a data block used as the body of URLRequest.
 
 Supplying the `formData` parameter will create a body for the URLRequest with the supplied dictionary url-encoded as form data.
 
