@@ -119,7 +119,7 @@ open func urlRequest(page: Int = 1, extraHeaders: [String: String] = [:]) -> URL
 Endpoints that return lots of data are often paged.  An `Endpoint` supports paging if the `Payload` class conforms to the `EndpointPageable` protocol.  There is a default implementation of the protocol, so a class can just declare conformance to enable paging.
 
 ```swift
-    extension MyPayloadClass: EndpoingPageable {}
+    extension MyPayloadClass: EndpointPageable {}
 ```
 
 This is the default implementation that provides the parameters sent to the server for paging.  
