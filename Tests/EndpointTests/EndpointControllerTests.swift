@@ -26,4 +26,14 @@ class EndpointControllerTests: XCTestCase {
         XCTAssertEqual(authHeader, "Bearer \(authToken)")
     }
     
+    func testDefaultUrl() {
+        let controller =
+            EndpointController<EndpointDefaultServerError>(defaultServerUrl: URL(string: "http://foo.com")!)
+        let endpoint = CodableEndpoint<User>(pathPrefix: "/baz")
+
+        let req = controller.urlRequest(forEndpoint: endpoint, page: 1)
+        
+        XCTAssertEqual(req?.url?.absoluteString, "http://foo.com/baz")
+    }
+    
 }

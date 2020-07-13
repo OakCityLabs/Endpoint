@@ -83,7 +83,7 @@ open class Endpoint<Payload> {
     ///   - password: Password for Basic HTTP Authorization header (`Authorization: Basic XXXXXXXXXXXXXXXX`)
     ///   - body: Data to be used verbatim as the HTTP body
     ///   - dateFormatter: DateFormatter object to be used during parsing to decode Date/Time objects
-    public init(serverUrl: URL?,
+    public init(serverUrl: URL? = nil,
                 pathPrefix: String,
                 method: EndpointHttpMethod = .get,
                 objId: String? = nil,
@@ -115,7 +115,6 @@ open class Endpoint<Payload> {
         self.dateFormatter = dateFormatter ?? .iso8601Full
     }
     
-    
     /// The `parse` method of the `Endpoint` takes the data retrieved from the server (often JSON encoded)
     /// and returns an instance of the `Payload`.
     /// - Parameters:
@@ -127,8 +126,8 @@ open class Endpoint<Payload> {
     }
     
     /// Generate the URL portion of the URLRequest without the query parameters
-    open var url: URL? {
-        guard let serverUrl = serverUrl else {
+    open func url(defaultServerUrl: URL? = nil) -> URL? {
+        guard let serverUrl = (serverUrl ?? defaultServerUrl) else {
             return nil
         }
         var url = serverUrl
@@ -193,15 +192,18 @@ open class Endpoint<Payload> {
         return nil
     }
     
-    
     /// Return a URLRequest associated with this endpoint configuration
     /// - Parameters:
     ///   - page: For paginated endpoints, which page to retrieve. This is a 1 based index.
     ///   - extraHeaders: Dictionary of extra headers to be added to the request
-    open func urlRequest(page: Int = 1, extraHeaders: [String: String] = [:]) -> URLRequest? {
+    ///   - defaultServerUrl: A fallback serverUrl to use if the endpoint's serverUrl is `nil`
+    open func urlRequest(page: Int = 1,
+                         extraHeaders: [String: String] = [:],
+                         defaultServerUrl: URL? = nil) -> URLRequest? {
         
-        guard let url = url, var components = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
-            return nil
+        guard let url = url(defaultServerUrl: defaultServerUrl),
+            var components = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
+                return nil
         }
         
         let qParams = requestQueryParams(page: page)

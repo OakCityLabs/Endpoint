@@ -20,7 +20,7 @@ open class EndpointController<ServerError: EndpointServerError> {
     private(set) var extraHeaders = [String: String]()
     private let logger = Logger(label: "com.oakcity.endpoint.logger")
     private let reachability: ReachabilityTester
-    
+    private let defaultServerUrl: URL?
     
     /// Create an EndpointController instance
     /// - Parameters:
@@ -28,18 +28,21 @@ open class EndpointController<ServerError: EndpointServerError> {
     ///   be created with the default config (URLSessionConfiguration.default)
     ///   - reachability: (optional) ReachabilityTester instance to use for testing network connectivity.  Unless
     ///   specified, one will be created
-    public init(session: URLSession = URLSession(configuration: URLSessionConfiguration.default),
+    ///   - defaultServerUrl: (optional) A server URL for generating an URLRequest for endpoints that have a nil
+    ///   serverUrl of their own.
+    public init(defaultServerUrl: URL? = nil,
+                session: URLSession = URLSession(configuration: URLSessionConfiguration.default),
                 reachability: ReachabilityTester = ReachabilityTester()) {
         
         self.reachability = reachability
         self.session = session
+        self.defaultServerUrl = defaultServerUrl
     }
     
     /// Remove a registered auth token
     open func removeAuthToken() {
         extraHeaders.removeValue(forKey: "Authorization")
     }
-    
     
     /// Add an auth token to be used for all subsequent requests.  This creates an "Authorization" header with the
     /// value of "Bearer <AUTHTOKEN>" where <AUTHTOKEN> is the string supplied here.
@@ -57,15 +60,13 @@ open class EndpointController<ServerError: EndpointServerError> {
         }
     }
     
-    
     /// Create the URLRequest associated with the given endpoint including an extra header information
     /// - Parameters:
     ///   - endpoint: Endpoint to create a URL from
     ///   - page: For pageable content, the page to retrieve
     open func urlRequest<Payload>(forEndpoint endpoint: Endpoint<Payload>, page: Int) -> URLRequest? {
-        return endpoint.urlRequest(page: page, extraHeaders: extraHeaders)
+        return endpoint.urlRequest(page: page, extraHeaders: extraHeaders, defaultServerUrl: defaultServerUrl)
     }
-    
     
     /// Load data from an endpoint.
     /// - Parameters:
@@ -88,8 +89,7 @@ open class EndpointController<ServerError: EndpointServerError> {
             return
         }
         
-        guard let serverUrl = endpoint.serverUrl,
-            let req = urlRequest(forEndpoint: endpoint, page: page) else {
+        guard let req = urlRequest(forEndpoint: endpoint, page: page) else {
                 assertionFailure("Failed to create urlRequest in `load`")
                 completion?(.failure(EndpointError.urlRequestCreationError))
                 return

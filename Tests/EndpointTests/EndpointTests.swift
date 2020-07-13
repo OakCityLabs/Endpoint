@@ -73,7 +73,22 @@ class EndpointTests: XCTestCase {
         let endpoint = DummyEndpoint(serverUrl: url, pathPrefix: prefix, objId: objId, pathSuffix: suffix)
         let req = endpoint.urlRequest()
         
-        XCTAssertEqual(endpoint.url?.absoluteString, expectedUrl?.absoluteString)
+        XCTAssertEqual(endpoint.url()?.absoluteString, expectedUrl?.absoluteString)
+        XCTAssertEqual(req?.url?.absoluteString, expectedUrl?.absoluteString)
+    }
+    
+    func testDefaultUrl() {
+        let url = URL(string: "http://oakcity.io")!
+        let prefix = "api/v1.0"
+        let objId = "4322"
+        let suffix = "followers"
+        
+        let expectedUrl = URL(string: "\(url)/\(prefix)/\(objId)/\(suffix)")
+        
+        let endpoint = DummyEndpoint(pathPrefix: prefix, objId: objId, pathSuffix: suffix)
+        let req = endpoint.urlRequest(defaultServerUrl: url)
+        
+        XCTAssertEqual(endpoint.url(defaultServerUrl: url)?.absoluteString, expectedUrl?.absoluteString)
         XCTAssertEqual(req?.url?.absoluteString, expectedUrl?.absoluteString)
     }
 
