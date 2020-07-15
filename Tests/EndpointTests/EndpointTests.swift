@@ -207,6 +207,9 @@ class EndpointTests: XCTestCase {
         XCTAssertTrue(bodyString.contains("foo=bar"))
         XCTAssertTrue(bodyString.contains("baz=1"))
         XCTAssertTrue(bodyString.contains("xxx=true"))
+        
+        // As of version 1.0.7, form params should be sorted alphabetically by key
+        XCTAssertEqual(bodyString, "baz=1&foo=bar&xxx=true")
     }
     
     func testContentType() {

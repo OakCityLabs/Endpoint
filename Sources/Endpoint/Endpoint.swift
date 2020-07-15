@@ -48,9 +48,11 @@ open class Endpoint<Payload> {
             return nil
         }
         
-        let parameterArray = formParams.map { (arg) -> String in
-            let (key, value) = arg
-            return "\(key)=\(value.percentEscaped)"
+        let parameterArray = formParams
+            .sorted { $0.0 < $1.0 }
+            .map { (arg) -> String in
+                let (key, value) = arg
+                return "\(key)=\(value.percentEscaped)"
         }
         let body = parameterArray.joined(separator: "&").data(using: .utf8)
         return body
