@@ -16,9 +16,9 @@ extension NSNotification.Name {
 
 open class EndpointController<ServerError: EndpointServerError> {
     
-    let session: URLSession
-    let reachability: ReachabilityTester
-    let defaultServerUrl: URL?
+    public let session: URLSession
+    public let reachability: ReachabilityTester
+    public let defaultServerUrl: URL?
 
     private(set) var extraHeaders = [String: String]()
 
