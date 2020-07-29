@@ -53,7 +53,7 @@ open class Endpoint<Payload> {
             .map { (arg) -> String in
                 let (key, value) = arg
                 return "\(key)=\(value.percentEscaped)"
-        }
+            }
         let body = parameterArray.joined(separator: "&").data(using: .utf8)
         return body
     }

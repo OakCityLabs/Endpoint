@@ -16,11 +16,14 @@ extension NSNotification.Name {
 
 open class EndpointController<ServerError: EndpointServerError> {
     
-    private let session: URLSession
+    let session: URLSession
+    let reachability: ReachabilityTester
+    let defaultServerUrl: URL?
+
     private(set) var extraHeaders = [String: String]()
+
     private let logger = Logger(label: "com.oakcity.endpoint.logger")
-    private let reachability: ReachabilityTester
-    private let defaultServerUrl: URL?
+    private let maxHttpResponseSize: Int
     
     /// Create an EndpointController instance
     /// - Parameters:
@@ -30,13 +33,17 @@ open class EndpointController<ServerError: EndpointServerError> {
     ///   specified, one will be created
     ///   - defaultServerUrl: (optional) A server URL for generating an URLRequest for endpoints that have a nil
     ///   serverUrl of their own.
+    ///   - maxHttpResponseSize: (optional) Integer value of the response size in bytes that will cause the
+    ///   HttpRespnoseValidator to cause a warning.  The default is Int.max which effectively disables the warning.
     public init(defaultServerUrl: URL? = nil,
                 session: URLSession = URLSession(configuration: URLSessionConfiguration.default),
-                reachability: ReachabilityTester = ReachabilityTester()) {
+                reachability: ReachabilityTester = ReachabilityTester(),
+                maxHttpResponseSize: Int = Int.max) {
         
         self.reachability = reachability
         self.session = session
         self.defaultServerUrl = defaultServerUrl
+        self.maxHttpResponseSize = maxHttpResponseSize
     }
     
     /// Remove a registered auth token
@@ -111,7 +118,8 @@ open class EndpointController<ServerError: EndpointServerError> {
             // print data: po String(data: data, encoding: .utf8)
             let validator = HttpResponseValidator(serverErrorType: ServerError.self,
                                                   acceptedMimeTypes: endpoint.mimeTypes,
-                                                  acceptedStatusCodes: endpoint.statusCodes)
+                                                  acceptedStatusCodes: endpoint.statusCodes,
+                                                  maxHttpResponseSize: self.maxHttpResponseSize)
             let validationResult = validator.validate(data: data,
                                                       response: urlResponse,
                                                       request: req)
