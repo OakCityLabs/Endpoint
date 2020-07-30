@@ -22,6 +22,10 @@ open class EndpointController<ServerError: EndpointServerError> {
 
     private(set) var extraHeaders = [String: String]()
 
+    public var allHttpHeaders: [String: String] {
+        return extraHeaders
+    }
+    
     private let logger = Logger(label: "com.oakcity.endpoint.logger")
     private let maxHttpResponseSize: Int
     
@@ -72,7 +76,7 @@ open class EndpointController<ServerError: EndpointServerError> {
     ///   - endpoint: Endpoint to create a URL from
     ///   - page: For pageable content, the page to retrieve
     open func urlRequest<Payload>(forEndpoint endpoint: Endpoint<Payload>, page: Int) -> URLRequest? {
-        return endpoint.urlRequest(page: page, extraHeaders: extraHeaders, defaultServerUrl: defaultServerUrl)
+        return endpoint.urlRequest(page: page, extraHeaders: allHttpHeaders, defaultServerUrl: defaultServerUrl)
     }
     
     /// Load data from an endpoint.
