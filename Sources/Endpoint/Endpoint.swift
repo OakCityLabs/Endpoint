@@ -79,6 +79,7 @@ open class Endpoint<Payload> {
     ///   - queryParams: Dictionary of query parameters appended to the URL - `expand=1`
     ///   - formParams: Form parameter dictionary sent in the body of the request (application/x-www-form-urlencoded)
     ///   - jsonParams: Parameters dictionary sent in the body of the request encoded as JSON (application/json)
+    ///   - headers: Dictionary of header values in the http request for this endpoint.  Overrides other header values.
     ///   - mimeTypes: Array of valid mime types for the data returned from the server
     ///   - contentType: Content type for the HTTP request sent to the server
     ///   - statusCodes: Array of valid status codes in the HTTP response from the server
