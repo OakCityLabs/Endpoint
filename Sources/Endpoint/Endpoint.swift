@@ -17,6 +17,7 @@ open class Endpoint<Payload> {
     public let queryParams: [String: String]
     public let formParams: [String: String]
     public let jsonParams: [String: Any]
+    public let headers: [String: String]
     public let mimeTypes: [String]
     public let contentType: String?
     public let statusCodes: [Int]
@@ -93,6 +94,7 @@ open class Endpoint<Payload> {
                 queryParams: [String: String] = [:],
                 formParams: [String: String] = [:],
                 jsonParams: [String: Any] = [:],
+                headers: [String: String] = [:],
                 mimeTypes: [String] = ["application/json"],
                 contentType: String? = nil,
                 statusCodes: [Int] = Array(200..<300),
@@ -108,6 +110,7 @@ open class Endpoint<Payload> {
         self.queryParams = queryParams
         self.formParams = formParams
         self.jsonParams = jsonParams
+        self.headers = headers
         self.mimeTypes = mimeTypes
         self.contentType = contentType
         self.statusCodes = statusCodes
@@ -216,23 +219,28 @@ open class Endpoint<Payload> {
             return nil
         }
         
-        var headers = extraHeaders
-        headers ["Accept-Encoding"] = "gzip"
+        var reqHeaders = extraHeaders
+        reqHeaders ["Accept-Encoding"] = "gzip"
         
         if (method == .post || method == .patch) && contentType == nil {
-            headers["Content-Type"] = formBody != nil ? "application/x-www-form-urlencoded" : "application/json"
+            reqHeaders["Content-Type"] = formBody != nil ? "application/x-www-form-urlencoded" : "application/json"
         }
         if let contentType = contentType {
-            headers["Content-Type"] = contentType
+            reqHeaders["Content-Type"] = contentType
         }
         
         if let authorizationHeader = authorizationHeader {
-            headers["Authorization"] = authorizationHeader
+            reqHeaders["Authorization"] = authorizationHeader
+        }
+        
+        // Override any other headers with those explicitly list in the `headers` attr
+        reqHeaders.merge(headers) { (_, new) -> String in
+            return new      // if there are matching keys, use the value in the new dict (self.headers)
         }
         
         var req = URLRequest(url: cUrl)
         req.httpMethod = method.rawValue
-        req.allHTTPHeaderFields = headers
+        req.allHTTPHeaderFields = reqHeaders
         
         if let body = body {
             req.httpBody = body

@@ -282,4 +282,20 @@ class EndpointTests: XCTestCase {
         ("testQueryParamsAttributes", testQueryParamsAttributes),
         ("testMethod", testMethod)
     ]
+    
+    func testHeaderOverride() {
+        
+        // check that the default 'accept-encoding' header is gzip
+        let endpoint1 = DummyEndpoint(serverUrl: URL(string: "http://oakcity.io")!,
+                                      pathPrefix: "")
+        let req1 = endpoint1.urlRequest()
+        XCTAssertEqual(req1?.allHTTPHeaderFields?["Accept-Encoding"], "gzip")
+        
+        // override 'accept-encoding' in the endpoint struct
+        let endpoint2 = DummyEndpoint(serverUrl: URL(string: "http://oakcity.io")!,
+                                      pathPrefix: "",
+                                      headers: ["Accept-Encoding": "cheeseburger"])
+        let req2 = endpoint2.urlRequest()
+        XCTAssertEqual(req2?.allHTTPHeaderFields?["Accept-Encoding"], "cheeseburger")
+    }
 }
