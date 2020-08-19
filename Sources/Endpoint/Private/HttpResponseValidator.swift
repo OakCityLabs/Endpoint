@@ -9,7 +9,7 @@
 import Foundation
 import Logging
 
-extension NSNotification.Name {
+public extension NSNotification.Name {
     static let endpointValidationError401Unauthorized = Notification.Name("EndpointValidationError401Unauthorized")
 }
 
