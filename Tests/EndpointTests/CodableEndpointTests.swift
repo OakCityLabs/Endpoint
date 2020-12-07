@@ -9,6 +9,10 @@
 import Endpoint
 import XCTest
 
+class FakeUrlSessionDataTask: URLSessionDataTask {
+    override func resume() {}
+}
+
 class FakeUrlSession: URLSession {
     
     let data: Data?
@@ -25,7 +29,7 @@ class FakeUrlSession: URLSession {
     override func dataTask(with request: URLRequest,
                            completionHandler: @escaping (Data?, URLResponse?, Error?) -> Void) -> URLSessionDataTask {
         completionHandler(data, urlResponse, error)
-        return URLSessionDataTask()
+        return FakeUrlSessionDataTask()
     }
     
 }
