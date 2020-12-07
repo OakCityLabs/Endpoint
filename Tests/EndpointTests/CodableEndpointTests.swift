@@ -25,9 +25,8 @@ class FakeUrlSession: URLSession {
     override func dataTask(with request: URLRequest,
                            completionHandler: @escaping (Data?, URLResponse?, Error?) -> Void) -> URLSessionDataTask {
         completionHandler(data, urlResponse, error)
-        return URLSessionDataTask()
+        return URLSession(configuration: .ephemeral).dataTask(with: request)
     }
-    
 }
 
 class FakeReachability: ReachabilityTester {
