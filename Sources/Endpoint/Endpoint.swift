@@ -25,6 +25,7 @@ open class Endpoint<Payload> {
     public let password: String?
     public let body: Data?
     public let dateFormatter: DateFormatter
+    public let failSilently: Bool
     
     /// Encode the `jsonParams` attribute to a JSON `Data` block for use as the HTTP body of a request
     open var jsonBody: Data? {
@@ -87,6 +88,7 @@ open class Endpoint<Payload> {
     ///   - password: Password for Basic HTTP Authorization header (`Authorization: Basic XXXXXXXXXXXXXXXX`)
     ///   - body: Data to be used verbatim as the HTTP body
     ///   - dateFormatter: DateFormatter object to be used during parsing to decode Date/Time objects
+    ///   - failSilently: If true, EndpointController won't log error outputs for this endpoint if loading fails
     public init(serverUrl: URL? = nil,
                 pathPrefix: String,
                 method: EndpointHttpMethod = .get,
@@ -102,7 +104,8 @@ open class Endpoint<Payload> {
                 username: String? = nil,
                 password: String? = nil,
                 body: Data? = nil,
-                dateFormatter: DateFormatter? = nil) {
+                dateFormatter: DateFormatter? = nil,
+                failSilently: Bool = false) {
         self.serverUrl = serverUrl
         self.pathPrefix = pathPrefix
         self.objId = objId
@@ -119,6 +122,7 @@ open class Endpoint<Payload> {
         self.password = password
         self.body = body
         self.dateFormatter = dateFormatter ?? .iso8601Full
+        self.failSilently = failSilently
     }
     
     /// The `parse` method of the `Endpoint` takes the data retrieved from the server (often JSON encoded)
