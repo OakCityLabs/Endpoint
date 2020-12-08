@@ -9,10 +9,6 @@
 import Endpoint
 import XCTest
 
-class FakeUrlSessionDataTask: URLSessionDataTask {
-    override func resume() {}
-}
-
 class FakeUrlSession: URLSession {
     
     let data: Data?
@@ -23,15 +19,14 @@ class FakeUrlSession: URLSession {
         self.data = data
         self.urlResponse = urlResponse
         self.error = error
-        super.init()
+        super.init() 
     }
     
     override func dataTask(with request: URLRequest,
                            completionHandler: @escaping (Data?, URLResponse?, Error?) -> Void) -> URLSessionDataTask {
         completionHandler(data, urlResponse, error)
-        return FakeUrlSessionDataTask()
+        return URLSession(configuration: .ephemeral).dataTask(with: request)
     }
-    
 }
 
 class FakeReachability: ReachabilityTester {
@@ -201,4 +196,82 @@ class CodableEndpointTests: XCTestCase {
     static var allTests = [
         ("testParse", testParse)
     ]
+    
+    func testNetworkError() {
+        FakeLogHandler.install()
+        let data = User.sampleJsonData!
+        let serverUrl = URL(string: "https://oakcity.io/foo/bar/baz/1")!
+        
+        let endpoint = CodableEndpoint<User>(serverUrl: serverUrl, pathPrefix: "")
+        
+        let httpHeaders = [
+            "Content-Type": "application/json"
+        ]
+        let urlResponse = HTTPURLResponse(url: serverUrl,
+                                          statusCode: 200,
+                                          httpVersion: "1.1",
+                                          headerFields: httpHeaders)
+    
+        let networkErr = NSError(domain: "idksure.bud", code: NSURLErrorCannotFindHost, userInfo: nil)
+        let fakeUrlSession = FakeUrlSession(data: data, urlResponse: urlResponse, error: networkErr)
+        let controller =
+            EndpointController<EndpointDefaultServerError>(session: fakeUrlSession,
+                                                           reachability: FakeReachability())
+        
+        XCTAssertFalse(controller.failSilently)
+        controller.load(endpoint) { result in
+            switch result {
+            case .success:
+                XCTFail("Should have network error")
+            case .failure(let error):
+                let nsErr = error as? EndpointError
+                XCTAssertEqual(nsErr, EndpointError.connectionError)
+            }
+        }
+        
+        let msg = "Network connection error: \(networkErr)"
+        FakeLogStorage.shared.assertMessageContains(level: .warning, message: msg,
+                                                    file: "EndpointController.swift",
+                                                    function: "process(networkError:)")
+    }
+    
+    func testNetworkErrorFailsSilently() {
+        FakeLogStorage.shared.clear()
+        let data = User.sampleJsonData!
+        let serverUrl = URL(string: "https://oakcity.io/foo/bar/baz/1")!
+        
+        let endpoint = CodableEndpoint<User>(serverUrl: serverUrl, pathPrefix: "")
+        
+        let httpHeaders = [
+            "Content-Type": "application/json"
+        ]
+        let urlResponse = HTTPURLResponse(url: serverUrl,
+                                          statusCode: 200,
+                                          httpVersion: "1.1",
+                                          headerFields: httpHeaders)
+    
+        let networkErr = NSError(domain: "idksure.bud", code: NSURLErrorCannotFindHost, userInfo: nil)
+        let fakeUrlSession = FakeUrlSession(data: data, urlResponse: urlResponse, error: networkErr)
+        let controller =
+            EndpointController<EndpointDefaultServerError>(session: fakeUrlSession,
+                                                           reachability: FakeReachability(),
+                                                           failSilently: true)
+        
+        XCTAssertTrue(controller.failSilently)
+        controller.load(endpoint) { result in
+            switch result {
+            case .success:
+                XCTFail("Should have network error")
+            case .failure(let error):
+                let nsErr = error as? EndpointError
+                XCTAssertEqual(nsErr, EndpointError.connectionError)
+            }
+        }
+        
+        let msg = "Network connection error: \(networkErr)"
+        FakeLogStorage.shared.assertMessageDoesNotContain(level: .warning,
+                                                          message: msg,
+                                                          file: "EndpointController.swift",
+                                                          function: "process(networkError:)")
+    }
 }

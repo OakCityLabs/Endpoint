@@ -56,6 +56,23 @@ class FakeLogStorage {
         XCTFail("Message: \(message) not found in LogStorage at log level: \(level)")
     }
     
+    func assertMessageDoesNotContain(level: Logger.Level, message: String, file: String?, function: String?) {
+        for record in records {
+            if record.level == level, record.message.description.contains(message) {
+                if let file = file, record.file != file {
+                    // skip if file is specified and doesn't match
+                    continue
+                }
+                if let function = function, record.function != function {
+                    // skip if function is specified and doesn't match
+                    continue
+                }
+                XCTFail("Message: \(message) was NOT expected to be found at log level: \(level)")
+            }
+        }
+    }
+    
+    
     func assertMatches(level: Logger.Level, message: String) {
         let msg = Logger.Message(stringLiteral: message)
         records.forEach { (record) in

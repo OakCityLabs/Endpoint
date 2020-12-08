@@ -169,7 +169,6 @@ class HttpResponseValidatorTests: XCTestCase {
     }
     
     func testLogging() {
-        FakeLogHandler.install()
         let validator = HttpResponseValidator(serverErrorType: EndpointDefaultServerError.self)
         let headers = ["Content-Type": "application/json"]
         let url = URL(string: "http://www.oakcity.io")!

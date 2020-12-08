@@ -19,6 +19,7 @@ open class EndpointController<ServerError: EndpointServerError> {
     public let session: URLSession
     public let reachability: ReachabilityTester
     public let defaultServerUrl: URL?
+    public let failSilently: Bool
 
     private(set) var extraHeaders = [String: String]()
 
@@ -42,12 +43,14 @@ open class EndpointController<ServerError: EndpointServerError> {
     public init(defaultServerUrl: URL? = nil,
                 session: URLSession = URLSession(configuration: URLSessionConfiguration.default),
                 reachability: ReachabilityTester = ReachabilityTester(),
-                maxHttpResponseSize: Int = Int.max) {
+                maxHttpResponseSize: Int = Int.max,
+                failSilently: Bool = false) {
         
         self.reachability = reachability
         self.session = session
         self.defaultServerUrl = defaultServerUrl
         self.maxHttpResponseSize = maxHttpResponseSize
+        self.failSilently = failSilently
     }
     
     /// Remove a registered auth token
@@ -166,12 +169,12 @@ open class EndpointController<ServerError: EndpointServerError> {
             NSURLErrorNotConnectedToInternet
         ]
         if let error = error as NSError?, connectionErrors.contains(error.code) {
-            logger.warning("Network connection error: \(error)")
+            if !failSilently { logger.warning("Network connection error: \(error)") }
             NotificationCenter.default.post(Notification(name: .endpointServerNotResponding))
             return .connectionError
         }
         if let error = error {
-            logger.warning("Unknown network error: \(error)")
+            if !failSilently { logger.warning("Unknown network error: \(error)") }
             return .unknownError
         }
         return nil
