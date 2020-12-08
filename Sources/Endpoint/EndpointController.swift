@@ -19,8 +19,7 @@ open class EndpointController<ServerError: EndpointServerError> {
     public let session: URLSession
     public let reachability: ReachabilityTester
     public let defaultServerUrl: URL?
-    public let failSilently: Bool
-
+    
     private(set) var extraHeaders = [String: String]()
 
     public var allHttpHeaders: [String: String] {
@@ -43,14 +42,12 @@ open class EndpointController<ServerError: EndpointServerError> {
     public init(defaultServerUrl: URL? = nil,
                 session: URLSession = URLSession(configuration: URLSessionConfiguration.default),
                 reachability: ReachabilityTester = ReachabilityTester(),
-                maxHttpResponseSize: Int = Int.max,
-                failSilently: Bool = false) {
+                maxHttpResponseSize: Int = Int.max) {
         
         self.reachability = reachability
         self.session = session
         self.defaultServerUrl = defaultServerUrl
         self.maxHttpResponseSize = maxHttpResponseSize
-        self.failSilently = failSilently
     }
     
     /// Remove a registered auth token
@@ -117,7 +114,7 @@ open class EndpointController<ServerError: EndpointServerError> {
                 semaphore?.signal()
             }
             
-            if let apiError = self.process(networkError: error) {
+            if let apiError = self.process(networkError: error, failSilently: endpoint.failSilently) {
                 DispatchQueue.performOnMainThread { completion?(.failure(apiError)) }
                 return
             }
@@ -156,7 +153,8 @@ open class EndpointController<ServerError: EndpointServerError> {
     
     /// Process a network error by mapping a raw error into an EndpointError object.
     /// - Parameter error: an error to process
-    open func process(networkError error: Error?) -> EndpointError? {
+    open func process(networkError error: Error?,
+                      failSilently: Bool) -> EndpointError? {
         if let error = error as NSError?, error.code == NSURLErrorCancelled {
             return .requestCancelled
         }
@@ -169,7 +167,9 @@ open class EndpointController<ServerError: EndpointServerError> {
             NSURLErrorNotConnectedToInternet
         ]
         if let error = error as NSError?, connectionErrors.contains(error.code) {
-            if !failSilently { logger.warning("Network connection error: \(error)") }
+            if !failSilently {
+                logger.warning("Network connection error: \(error)")
+            }
             NotificationCenter.default.post(Notification(name: .endpointServerNotResponding))
             return .connectionError
         }

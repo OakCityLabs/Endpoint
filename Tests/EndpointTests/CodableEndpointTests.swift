@@ -218,7 +218,7 @@ class CodableEndpointTests: XCTestCase {
             EndpointController<EndpointDefaultServerError>(session: fakeUrlSession,
                                                            reachability: FakeReachability())
         
-        XCTAssertFalse(controller.failSilently)
+        XCTAssertFalse(endpoint.failSilently)
         controller.load(endpoint) { result in
             switch result {
             case .success:
@@ -232,7 +232,7 @@ class CodableEndpointTests: XCTestCase {
         let msg = "Network connection error: \(networkErr)"
         FakeLogStorage.shared.assertMessageContains(level: .warning, message: msg,
                                                     file: "EndpointController.swift",
-                                                    function: "process(networkError:)")
+                                                    function: "process(networkError:failSilently:)")
     }
     
     func testNetworkErrorFailsSilently() {
@@ -240,7 +240,7 @@ class CodableEndpointTests: XCTestCase {
         let data = User.sampleJsonData!
         let serverUrl = URL(string: "https://oakcity.io/foo/bar/baz/1")!
         
-        let endpoint = CodableEndpoint<User>(serverUrl: serverUrl, pathPrefix: "")
+        let endpoint = CodableEndpoint<User>(serverUrl: serverUrl, pathPrefix: "", failSilently: true)
         
         let httpHeaders = [
             "Content-Type": "application/json"
@@ -254,10 +254,9 @@ class CodableEndpointTests: XCTestCase {
         let fakeUrlSession = FakeUrlSession(data: data, urlResponse: urlResponse, error: networkErr)
         let controller =
             EndpointController<EndpointDefaultServerError>(session: fakeUrlSession,
-                                                           reachability: FakeReachability(),
-                                                           failSilently: true)
+                                                           reachability: FakeReachability())
         
-        XCTAssertTrue(controller.failSilently)
+        XCTAssertTrue(endpoint.failSilently)
         controller.load(endpoint) { result in
             switch result {
             case .success:
@@ -272,6 +271,6 @@ class CodableEndpointTests: XCTestCase {
         FakeLogStorage.shared.assertMessageDoesNotContain(level: .warning,
                                                           message: msg,
                                                           file: "EndpointController.swift",
-                                                          function: "process(networkError:)")
+                                                          function: "process(networkError:failSilently:)")
     }
 }
