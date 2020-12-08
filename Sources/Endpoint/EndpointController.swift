@@ -168,13 +168,13 @@ open class EndpointController<ServerError: EndpointServerError> {
             NSURLErrorTimedOut,
             NSURLErrorNotConnectedToInternet
         ]
-        if let error = error as NSError?, connectionErrors.contains(error.code), !failSilently {
-            logger.warning("Network connection error: \(error)")
+        if let error = error as NSError?, connectionErrors.contains(error.code) {
+            if !failSilently { logger.warning("Network connection error: \(error)") }
             NotificationCenter.default.post(Notification(name: .endpointServerNotResponding))
             return .connectionError
         }
-        if let error = error, !failSilently {
-            logger.warning("Unknown network error: \(error)")
+        if let error = error {
+            if !failSilently { logger.warning("Unknown network error: \(error)") }
             return .unknownError
         }
         return nil
