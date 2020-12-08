@@ -88,7 +88,7 @@ open class Endpoint<Payload> {
     ///   - password: Password for Basic HTTP Authorization header (`Authorization: Basic XXXXXXXXXXXXXXXX`)
     ///   - body: Data to be used verbatim as the HTTP body
     ///   - dateFormatter: DateFormatter object to be used during parsing to decode Date/Time objects
-    ///   - failSilently: If true, EndpointController won't log error outputs if loading fails
+    ///   - failSilently: If true, EndpointController won't log error outputs for this endpoint if loading fails
     public init(serverUrl: URL? = nil,
                 pathPrefix: String,
                 method: EndpointHttpMethod = .get,
