@@ -77,7 +77,7 @@ public enum ValidationError<ServerError: EndpointServerError>: Error {
 }
 
 extension ValidationError: Equatable {
-    //swiftlint:disable:next cyclomatic_complexity function_body_length
+    // swiftlint:disable:next cyclomatic_complexity function_body_length
     public static func == (lhs: ValidationError, rhs: ValidationError) -> Bool {
         switch lhs {
         case .unknown:

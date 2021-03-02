@@ -20,6 +20,23 @@ open class EndpointController<ServerError: EndpointServerError> {
     public let reachability: ReachabilityTester
     public let defaultServerUrl: URL?
     
+    public let recordResponses = false
+    
+    private lazy var tmpDirectory: URL? = {
+        let tmpDir = FileManager.default.temporaryDirectory.appendingPathComponent("\(UUID().uuidString)")
+        do {
+            try FileManager.default.createDirectory(at: tmpDir,
+                                                    withIntermediateDirectories: true,
+                                                    attributes: nil)
+        } catch {
+            logger.error("Failed to create temp dir at \(tmpDir)")
+            return nil
+        }
+        let source = defaultServerUrl?.absoluteString ?? "server"
+        logger.info("Recording responses from \(source) to \(tmpDir)")
+        return tmpDir
+    }()
+    
     private(set) var extraHeaders = [String: String]()
 
     public var allHttpHeaders: [String: String] {
@@ -113,12 +130,14 @@ open class EndpointController<ServerError: EndpointServerError> {
             defer {
                 semaphore?.signal()
             }
-            
+                        
             if let apiError = self.process(networkError: error, failSilently: endpoint.failSilently) {
                 DispatchQueue.performOnMainThread { completion?(.failure(apiError)) }
                 return
             }
             
+            self.record(data: data, forResponse: urlResponse)
+
             // print data: po String(data: data, encoding: .utf8)
             let validator = HttpResponseValidator(serverErrorType: ServerError.self,
                                                   acceptedMimeTypes: endpoint.mimeTypes,
@@ -178,5 +197,38 @@ open class EndpointController<ServerError: EndpointServerError> {
             return .unknownError
         }
         return nil
+    }
+    
+    open func record(data: Data?, forResponse response: URLResponse?) {
+        guard recordResponses else { return }
+        guard let data = data, let response = response else { return }       // nothing to record!
+        
+        guard let targetUrl = recordUrl(forResponse: response) else { return }
+        do {
+            try data.write(to: targetUrl)
+        } catch {
+            logger.error("Failed to log response data to \(targetUrl)")
+        }
+    }
+    
+    private func recordUrl(forResponse response: URLResponse) -> URL? {
+        guard let url = response.url else { return nil }
+        
+        guard let comps = URLComponents(url: url, resolvingAgainstBaseURL: true) else { return nil }
+        guard let host = comps.host, let port = comps.port else { return nil }
+        guard let tmpDirectory = tmpDirectory else { return nil }
+        
+        var count = 0
+        let baseTmpUrl = tmpDirectory
+            .appendingPathComponent("\(host)_\(port)")
+            .appendingPathComponent(comps.path)
+        
+        var tmpUrl = baseTmpUrl.appendingPathExtension(".data")
+                
+        while FileManager.default.fileExists(atPath: tmpUrl.path) {
+            tmpUrl = baseTmpUrl.appendingPathExtension("_\(count)").appendingPathExtension(".data")
+            count += 1
+        }
+        return tmpUrl
     }
 }
