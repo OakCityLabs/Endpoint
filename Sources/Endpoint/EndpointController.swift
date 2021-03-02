@@ -136,7 +136,7 @@ open class EndpointController<ServerError: EndpointServerError> {
                 return
             }
             
-            self.record(data: data, forResponse: urlResponse)
+            self.record(data: data, forRequestUrl: urlResponse?.url)
 
             // print data: po String(data: data, encoding: .utf8)
             let validator = HttpResponseValidator(serverErrorType: ServerError.self,
@@ -199,11 +199,11 @@ open class EndpointController<ServerError: EndpointServerError> {
         return nil
     }
     
-    open func record(data: Data?, forResponse response: URLResponse?) {
+    open func record(data: Data?, forRequestUrl url: URL?) {
         guard recordResponses else { return }
-        guard let data = data, let response = response else { return }       // nothing to record!
+        guard let data = data, let url = url else { return }       // nothing to record!
         
-        guard let targetUrl = recordUrl(forResponse: response) else { return }
+        guard let targetUrl = recordUrl(forRequestUrl: url) else { return }
         do {
             try data.write(to: targetUrl)
         } catch {
@@ -211,8 +211,7 @@ open class EndpointController<ServerError: EndpointServerError> {
         }
     }
     
-    private func recordUrl(forResponse response: URLResponse) -> URL? {
-        guard let url = response.url else { return nil }
+    private func recordUrl(forRequestUrl url: URL) -> URL? {
         
         guard let comps = URLComponents(url: url, resolvingAgainstBaseURL: true) else { return nil }
         guard let host = comps.host, let port = comps.port else { return nil }
