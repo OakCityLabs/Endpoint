@@ -23,7 +23,8 @@ open class EndpointController<ServerError: EndpointServerError> {
     public var recordResponses = false
     
     private lazy var tmpDirectory: URL? = {
-        let tmpDir = FileManager.default.temporaryDirectory.appendingPathComponent("\(UUID().uuidString)")
+        let tmpDir = FileManager.default.temporaryDirectory
+            .appendingPathComponent("EndpointController_Recordings_\(UUID().uuidString)")
         do {
             try FileManager.default.createDirectory(at: tmpDir,
                                                     withIntermediateDirectories: true,
@@ -214,7 +215,15 @@ open class EndpointController<ServerError: EndpointServerError> {
     private func recordUrl(forRequestUrl url: URL) -> URL? {
         
         guard let comps = URLComponents(url: url, resolvingAgainstBaseURL: true) else { return nil }
-        guard let host = comps.host, let port = comps.port else { return nil }
+        guard let host = comps.host, let scheme = comps.scheme else { return nil }
+    
+        let port: String = {
+            if let port = comps.port { return "\(port)" }
+            if scheme == "https" { return "443" }
+            if scheme == "http" { return "80" }
+            return "xxxx"
+        }()
+        
         guard let tmpDirectory = tmpDirectory else { return nil }
         
         var count = 0
