@@ -20,7 +20,7 @@ open class EndpointController<ServerError: EndpointServerError> {
     public let reachability: ReachabilityTester
     public let defaultServerUrl: URL?
     
-    public let recordResponses = false
+    public var recordResponses = false
     
     private lazy var tmpDirectory: URL? = {
         let tmpDir = FileManager.default.temporaryDirectory.appendingPathComponent("\(UUID().uuidString)")
