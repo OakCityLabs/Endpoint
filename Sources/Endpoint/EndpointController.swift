@@ -223,10 +223,20 @@ open class EndpointController<ServerError: EndpointServerError> {
             .appendingPathComponent("\(host)_\(port)")
             .appendingPathComponent(comps.path)
         
-        var tmpUrl = baseTmpUrl.appendingPathExtension(".data")
-                
+        var tmpUrl = baseTmpUrl.appendingPathExtension("data")
+        
+        // Make sure the directory exists that we want to write in
+        let localTmpDir = tmpUrl.deletingLastPathComponent()
+        do {
+            try FileManager.default.createDirectory(at: localTmpDir,
+                                                    withIntermediateDirectories: true,
+                                                    attributes: nil)
+        } catch {
+            logger.error("Failed to create directory at \(localTmpDir)")
+        }
+
         while FileManager.default.fileExists(atPath: tmpUrl.path) {
-            tmpUrl = baseTmpUrl.appendingPathExtension("_\(count)").appendingPathExtension(".data")
+            tmpUrl = baseTmpUrl.appendingPathExtension("\(count)").appendingPathExtension("data")
             count += 1
         }
         return tmpUrl
