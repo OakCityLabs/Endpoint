@@ -244,7 +244,8 @@ open class EndpointController<ServerError: EndpointServerError> {
         }
 
         while FileManager.default.fileExists(atPath: tmpUrl.path) {
-            tmpUrl = baseTmpUrl.appendingPathExtension("\(count)").appendingPathExtension("data")
+            let paddedCount = String(format: "%04d", count)
+            tmpUrl = baseTmpUrl.appendingPathExtension(paddedCount).appendingPathExtension("json")
             count += 1
         }
         return tmpUrl
