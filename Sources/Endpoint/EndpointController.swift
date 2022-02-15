@@ -231,7 +231,8 @@ open class EndpointController<ServerError: EndpointServerError> {
             .appendingPathComponent("\(host)_\(port)")
             .appendingPathComponent(comps.path)
         
-        var tmpUrl = baseTmpUrl.appendingPathExtension("0000").appendingPathExtension("data")
+
+        var tmpUrl = baseTmpUrl.appendingPathExtension("0000").appendingPathExtension("json")
         
         // Make sure the directory exists that we want to write in
         let localTmpDir = tmpUrl.deletingLastPathComponent()
