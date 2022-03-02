@@ -62,7 +62,7 @@ class HttpResponseValidatorTests: XCTestCase {
                            serverError: EndpointDefaultServerError(error: nil, reason: "Error #9", detail: nil)))
     }
     
-    func testSucess() {
+    func testSuccess() {
         let validator = HttpResponseValidator(serverErrorType: EndpointDefaultServerError.self)
         let headers = ["Content-Type": "application/json"]
         let url = URL(string: "http://www.oakcity.io")!
@@ -208,5 +208,36 @@ class HttpResponseValidatorTests: XCTestCase {
             FakeLogStorage.shared.assertMessageContains(level: .debug, message: line, file: file, function: function)
         }
         
+    }
+    
+    func testNotification() throws {
+        
+        let validator = HttpResponseValidator(serverErrorType: EndpointDefaultServerError.self)
+        let headers = ["Content-Type": "application/json"]
+        let url = URL(string: "http://www.oakcity.io/foo/bar")!
+        let response = HTTPURLResponse(url: url, statusCode: 401, httpVersion: "v1.1", headerFields: headers)
+        let serverError = EndpointDefaultServerError(error: nil, reason: "Error #401", detail: nil)
+        let data = try! JSONEncoder().encode(serverError)
+        let req = URLRequest(url: url)
+
+        // Make sure the notification is broadcase and that it has the right payload
+        let expectation = expectation(forNotification: .endpointValidationError401Unauthorized,
+                                      object: validator) { notification in
+            guard let notifReq = notification.userInfo?[HttpResponseValidator<EndpointDefaultServerError>.requestKey]
+                    as? URLRequest else { return false }
+            XCTAssertEqual(notifReq.url?.absoluteString, "http://www.oakcity.io/foo/bar")
+            return req == notifReq
+        }
+        
+        let validationResult = validator.validate(data: data, response: response, request: req)
+        
+        if case ValidationResult.failure(let error) = validationResult {
+            let referenceError = ServerValidationError.unauthorized(EndpointDefaultServerError(reason: "Error #7"))
+            XCTAssertTrue((error as! ValidationError) == referenceError)
+        } else {
+            XCTFail("Unexepected error type.")
+        }
+
+        wait(for: [expectation], timeout: 0.1)
     }
 }

@@ -29,6 +29,7 @@ public enum ValidationResult {
 
 class HttpResponseValidator<ServerError: EndpointServerError> {
     
+    static var requestKey: String { "HttpResponseValidator.request" }
     private let acceptedMimeTypes: [MimeType]
     private let acceptedStatusCodes: [Int]
     private let logger = Logger(label: "com.oakcity.endpoint.httpresponsevalidator")
@@ -46,10 +47,16 @@ class HttpResponseValidator<ServerError: EndpointServerError> {
         acceptedStatusCodes = codes
     }
     
-    private func postErrorNotification(statusCode: Int) {
+    private func postErrorNotification(statusCode: Int, request: URLRequest) {
         switch statusCode {
         case 401:
-            NotificationCenter.default.post(Notification(name: .endpointValidationError401Unauthorized))
+            let userInfo: [AnyHashable: Any] = [
+                HttpResponseValidator<ServerError>.requestKey: request,
+            ]
+            let notif = Notification(name: .endpointValidationError401Unauthorized,
+                                     object: self,
+                                     userInfo: userInfo)
+            NotificationCenter.default.post(notif)
         default:
             break
         }
@@ -65,7 +72,7 @@ class HttpResponseValidator<ServerError: EndpointServerError> {
         }
         
         let statusCode = response.statusCode
-        postErrorNotification(statusCode: statusCode)
+        postErrorNotification(statusCode: statusCode, request: request)
         
         if data == nil, statusCode != 204 {
             return .failure(ValidationError<ServerError>.noData)
