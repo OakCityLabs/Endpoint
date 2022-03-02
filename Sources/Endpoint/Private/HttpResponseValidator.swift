@@ -27,9 +27,9 @@ public enum ValidationResult {
     }
 }
 
-class HttpResponseValidator<ServerError: EndpointServerError> {
+public class HttpResponseValidator<ServerError: EndpointServerError> {
     
-    static var requestKey: String { "HttpResponseValidator.request" }
+    public static var requestKey: String { "HttpResponseValidator.request" }
     private let acceptedMimeTypes: [MimeType]
     private let acceptedStatusCodes: [Int]
     private let logger = Logger(label: "com.oakcity.endpoint.httpresponsevalidator")
@@ -138,7 +138,7 @@ class HttpResponseValidator<ServerError: EndpointServerError> {
         return length
     }
     
-    func validate(data: Data?,
+    public func validate(data: Data?,
                   response urlResponse: URLResponse?,
                   request: URLRequest) -> ValidationResult {
         let result = performValidation(data: data, response: urlResponse, request: request)
